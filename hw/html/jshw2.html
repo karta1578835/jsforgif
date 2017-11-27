@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <style>
+  #info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+
+body {
+  overflow: hidden;
+}
+
+</style> 
+</head>
+<body>
+
+<div id="info">
+<p>Tank</p>
+<button id="view" style="width:10%" value = 'switch'>god view</button>
+</div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+  <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+ <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+  class Ball {
+	constructor () {
+    this.vel = new THREE.Vector3();
+    this.force = new THREE.Vector3(0,-10,0);
+    this.rebirth();    
+  }  
+  update (dt) {
+		if (this.pos.y > 0) {
+    	this.vel.add (this.force.clone().multiplyScalar(dt));
+  		this.pos.add (this.vel.clone().multiplyScalar(dt));  		
+    }else if (this.pos.y < 0) {
+      this.pos.y = 0;
+    }
+	}
+  setPos(pos) {
+  	this.pos = pos;
+  }
+  getPos() {
+  	return this.pos;
+  }
+  rebirth(x,y,z) {
+  	this.stopped = false;
+    this.vel.set (x,y,z).setLength(50);
+  }
+}
+
+$("#view").click(function() {	
+	if(views){ // is turning
+		$('#view').text('god view');
+    camera.position.copy(link4.localToWorld(new THREE.Vector3(0, -150, 0)));
+	}
+	else{
+		$('#view').text('first person view');	
+    camera.position.copy(link2.localToWorld(new THREE.Vector3(-80, 200, 0)));
+  }
+  views = !views;
+});
+
+function isCrashed(cannonball) {
+	if(((cannonball.getWorldPosition().x >= target.position.x - 5) && (cannonball.getWorldPosition().x <= target.position.x + 5))&&
+  ((cannonball.getWorldPosition().y >= target.position.y - 7) && (cannonball.getWorldPosition().y <= target.position.y + 7))&&
+  ((cannonball.getWorldPosition().z >= target.position.z - 7) && (cannonball.getWorldPosition().z <= target.position.z + 7)))return true;
+  else return false;
+}
+var camera, scene, renderer, mesh, light, controls;
+var keyboard = new KeyboardState();
+var theta1 = 0;
+var theta2 = 0;
+var theta3 = 0;
+var link1, link2, link3, link4;
+var xmove=0;
+var zmove=0;
+var balls, ballMeshes;
+var views;
+var target;
+var fall;
+init();
+animate();
+
+function makeLink() {
+  var link = new THREE.Object3D();
+  var mesh = new THREE.Mesh(new THREE.BoxGeometry(60, 12, 30), new THREE.MeshNormalMaterial());
+  link.add(mesh);
+  return link;
+}
+
+function makeLink2() {
+  var link = new THREE.Object3D();
+  var cylinder = new THREE.Mesh (new THREE.CylinderBufferGeometry(10, 12, 10, 20), new THREE.MeshNormalMaterial()); 
+  link.add (cylinder);  
+  return link;
+}
+
+function makeLink3() {
+  var link = new THREE.Object3D();
+  var cylinder = new THREE.Mesh (new THREE.CylinderBufferGeometry(2, 2, 10, 20), new THREE.MeshNormalMaterial());
+  link.add(cylinder);
+  
+  return link;
+      
+}
+function makeLink4() {
+  var link = new THREE.Object3D();
+  var cylinder = new THREE.Mesh (new THREE.CylinderBufferGeometry(2, 2, 15, 20), new THREE.MeshNormalMaterial());   
+  link.add(cylinder); 
+ 
+  return link; 
+  
+}
+
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.z = 500;
+  scene.add(camera);
+
+  var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+  scene.add(gridXZ);
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  document.body.appendChild(renderer.domElement);
+  ////////////////////////////////////////////////////////////////////////
+
+	link1 = makeLink(); scene.add (link1)
+  link2 = makeLink2(); scene.add (link2)
+  link3 = makeLink3(); scene.add (link3)
+  link4 = makeLink4(); scene.add (link4)
+  link1.position.set (0, 6, 0);
+  link1.rotation.y = theta1;
+  link1.add (link2);
+  link2.position.set (15, 11, 0);
+  link2.rotation.x = theta2;
+  link2.add (link3);
+  link3.position.set (11, 2, 0);
+  link3.rotation.x= theta3+ Math.PI / 2;
+  link3.add (link4);
+  link4.position.set (7, 0, 0);
+  link4.rotation.z =Math.PI / 2;  
+  
+  /////////////////////
+  var geometry = new THREE.SphereGeometry(2, 20, 20);
+  ballMesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+  //scene.add(ballMesh);
+  balls = [];
+  ballMeshes = [];
+  madetarget();//沒+會有BUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+}
+function madetarget(){
+	var geometry = new THREE.CylinderGeometry(10, 10, 0, 32 )
+  var material = new THREE.MeshNormalMaterial;
+  target = new THREE.Mesh( geometry.clone(), material.clone() );
+  target.position.set(-80,30,Math.random() * 201 - 100);
+  target.rotation.z += Math.PI/2;
+  scene.add( target );
+}
+function animate() {
+  controls.update();
+  keyboard.update();
+  
+  if (keyboard.pressed ('A')) {
+  	theta1  += 0.01;    
+  } else if (keyboard.pressed ('D')) {
+    theta1 -= 0.01;
+  } else if (keyboard.pressed ('J')) {
+    theta2 += 0.01;   
+  } else if (keyboard.pressed ('L')) {
+    theta2 -= 0.01;    
+  } else if (keyboard.pressed ('I')) {
+    theta3 += 0.01;
+    if(theta3 >=0.9) theta3 =0.9;
+  } else if (keyboard.pressed ('K')) {
+    theta3 -= 0.01;
+    if(theta3 <=-0.3) theta3 =-0.3;
+  } else if (keyboard.pressed ('W')) {
+    xmove +=Math.cos(link1.rotation.y);
+    zmove -=Math.sin(link1.rotation.y);
+    xmove1=xmove;
+    zmove1=zmove;
+ } else if (keyboard.pressed ('S')) {
+    xmove -=Math.cos(link1.rotation.y);
+    zmove +=Math.sin(link1.rotation.y);
+    xmove1=xmove;
+    zmove1=zmove;
+  } 
+  
+  link1.rotation.y = theta1; 
+  link2.rotation.y = theta2;
+  link3.rotation.y = theta3;
+  link1.position.set (xmove, 6, zmove);
+ 
+  //keyboard.update(); 
+  if (keyboard.down("space")) {
+   	let ball = new Ball();
+  	balls.push (ball);
+   	let thisMesh = ballMesh.clone();
+  	ballMeshes.push (thisMesh);
+    scene.add (thisMesh)
+    ball.setPos(link4.localToWorld(new THREE.Vector3(0, -5, 0)));
+  	let x = link4.getWorldPosition().x - link3.getWorldPosition().x;
+   	let y = link4.getWorldPosition().y - link3.getWorldPosition().y;
+   	let z = link4.getWorldPosition().z - link3.getWorldPosition().z;
+   	ball.rebirth(x,y,z);
+  }else{
+  	balls.forEach (function (ball) {
+    ball.update (0.1);   
+    })
+   }  
+	for (let i = 0; i < balls.length; i++) {
+  	ballMeshes[i].position.copy (balls[i].getPos());
+    if(isCrashed(ballMeshes[i])){
+    	fall = true;
+    }
+  }
+  if(fall === true){
+  	target.position.y -= 0.8;
+    target.rotation.z += Math.PI/60;
+    if(target.rotation.z > Math.PI) target.rotation.z = Math.PI;
+    if(target.position.y < 0) {
+      target.position.y = 0;
+      madetarget();
+      fall = false;
+    }
+  }
+  requestAnimationFrame(animate);
+  render();
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
+
+// important to add this 
+// in jsfiddle!
+window.focus();
+
+</script>
+</body>
+</html>
