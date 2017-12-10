@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+	#info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+
+body {
+  overflow: hidden;
+}
+
+
+
+</style>
+</head>
+
+<body> 
+	<div id="info">
+		<br> car-drive
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+	<script src="https://threejs.org/examples/js/controls/OrbitControls.js">
+	</script>
+
+	<!--script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/DDSLoader.js"></script-->
+	<script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/MTLLoader.js"></script>
+	<script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/OBJLoader.js"></script>
+	
+	<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+	
+
+<script>
+var camera, scene, renderer;
+var controls;
+var keyboard = new KeyboardState();
+var speed, angle, vel;
+var clock;
+var xmove=0,zmove=0,theta1=0;
+var cameraHUD, sceneHUD;
+var target;
+var pos = new THREE.Vector3();
+var xmove=0;
+var zmove=0;
+
+(function() {
+  Math.clamp = function(val,min,max){
+    return Math.min(Math.max(val,min),max);
+    
+  }})();
+function madetarget(){
+  var geometry = new THREE.CylinderGeometry(10, 10,20, 32 )
+  var material = new THREE.MeshNormalMaterial;
+  target = new THREE.Mesh( geometry.clone(), material.clone() );
+  target.position.set(-50,10,10);  
+  scene.add( target );
+}
+
+function initHUD() {
+  // sceneHUD: a simple line boundary
+  sceneHUD = new THREE.Scene();
+  cameraHUD = new THREE.OrthographicCamera(-10.5, 10.5, 10.5, -10.5, -10, 10);
+  cameraHUD.position.z = 5;
+  //sceneHUD.add(cameraHUD);
+
+  var lineGeometry = new THREE.Geometry();
+  lineGeometry.vertices.push(new THREE.Vector3(-10, -10, 0),
+    new THREE.Vector3(10, -10, 0),
+    new THREE.Vector3(10, 10, 0),
+    new THREE.Vector3(-10, 10, 0),
+    new THREE.Vector3(-10, -10, 0));
+  var line = new THREE.Line(lineGeometry,
+    new THREE.LineBasicMaterial({
+      color: 0xffffff
+    }));
+  sceneHUD.add(line);
+  
+  // depth test for line??
+}
+
+
+init();
+animate();
+
+function buildcar() {
+    
+	car = new THREE.Object3D();
+	var mtlLoader = new THREE.MTLLoader();
+ 	mtlLoader.load('https://karta1578835.github.io/jsforgif/hw/hw3-car-mod/1967-shelby-ford-mustang.mtl', function(materials) {	
+    materials.preload();
+    var objLoader = new THREE.OBJLoader();
+    objLoader.setMaterials(materials);
+    objLoader.load('https://karta1578835.github.io/jsforgif/hw/hw3-car-mod/1967-shelby-ford-mustang.obj', function(object) {
+			var theObject =  unitize (object, 20);
+			car.add (theObject);							
+			scene.add (car);			
+			//////// MATERIAL ADJUSTMENT for porsche ///////////////
+			// transparent window: double-side fix
+			object.traverse (
+				function(mesh) {
+					if (mesh instanceof THREE.Mesh) {
+						mesh.material.side = THREE.DoubleSide;
+					}
+				});
+
+
+    }, onProgress, onError);
+
+  });
+
+function unitize (object, targetSize) {  
+	
+	// find bounding box of 'object'
+	var box3 = new THREE.Box3();
+	box3.setFromObject (object);
+	var size = new THREE.Vector3();
+	size.subVectors (box3.max, box3.min);
+	var center = new THREE.Vector3();
+	center.addVectors(box3.max, box3.min).multiplyScalar (0.5);
+	
+	console.log ('center: ' + center.x + ', '+center.y + ', '+center.z );
+	console.log ('size: ' + size.x + ', ' +  size.y + ', '+size.z );
+	
+	// uniform scaling according to objSize
+	var objSize = findMax (size);
+	var scaleSet = targetSize/objSize;
+				
+	var theObject =  new THREE.Object3D();
+	theObject.add (object);
+	object.scale.set (scaleSet, scaleSet, scaleSet);
+	object.position.set (-center.x*scaleSet, -center.y*scaleSet + size.y/2*scaleSet, -center.z*scaleSet);
+	
+	 
+			
+	return theObject;
+	
+	
+	// helper function
+	function findMax(v) {
+		if (v.x > v.y) {
+			return v.x > v.z ? v.x : v.z;
+		} else { // v.y > v.x
+			return v.y > v.z ? v.y : v.z;
+		} 
+	}	
+}
+
+var onProgress = function(xhr) {
+    if (xhr.lengthComputable) {
+      var percentComplete = xhr.loaded / xhr.total * 100;
+      console.log(Math.round(percentComplete, 2) + '% downloaded');
+    }
+  };
+
+  var onError = function(xhr) {};   
+}
+
+function init() {
+  container = document.createElement('div');
+  document.body.appendChild(container);
+
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 20000);
+  camera.position.z = 250;
+
+  // scene
+
+  scene = new THREE.Scene();
+
+	gridxz = new THREE.GridHelper (200, 20,'red','white');
+	scene.add (gridxz);
+	
+  var ambient = new THREE.AmbientLight(0x444444);
+  scene.add(ambient);
+
+  var directionalLight = new THREE.DirectionalLight(0xffffff);
+  directionalLight.position.set(0, 1, 1).normalize();
+  scene.add(directionalLight);
+
+  // model
+
+  
+
+  //THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
+
+  
+
+  //
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  container.appendChild(renderer.domElement);
+	renderer.setClearColor (0x888888);
+
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	camera.position.z = 200;
+
+  window.addEventListener('resize', onWindowResize, false);
+  speed = 1.0;
+  angle = 0.0; 
+  buildcar();
+  initHUD();
+  madetarget();
+}
+
+////////////////////////////////////////
+// create an Object3D of the given object
+// so that it is centered at +Y axis
+// 
+
+
+
+function onWindowResize() {
+
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+}
+
+function update() {
+
+  keyboard.update();
+	if ( keyboard.pressed("A") ) 
+		angle += 0.01;               
+	if ( keyboard.pressed("D") )
+		angle -= 0.01;               
+	if ( keyboard.pressed("W") ){  
+		xmove +=Math.sin(-angle);
+        zmove -=Math.cos(-angle);
+		speed += 0.1;        
+	}
+	if ( keyboard.pressed("S") ){
+		xmove -=Math.sin(-angle);
+		zmove +=Math.cos(-angle);
+		speed -= 0.1;    
+	}
+	speed = Math.clamp (speed, 1, 20);		
+	vel = new THREE.Vector3(speed,0,0);
+	
+	vel.applyAxisAngle (new THREE.Vector3(0,1,0), angle);
+	pos.add (vel.clone().multiplyScalar()); 	
+}
+
+function animate() {
+
+  controls.update(); 
+  update();
+
+  // car update
+  car.position.copy(pos);
+  car.rotation.y = angle;
+  car.position.set (xmove, 0, zmove);
+  requestAnimationFrame(animate);
+  render();
+}
+
+
+
+function render() {
+
+  var WW = window.innerWidth;
+  var HH = window.innerHeight;
+
+  renderer.setScissorTest(true);
+
+  renderer.setViewport(-100, -100, WW, HH);
+  camera.aspect = WW / HH;
+  camera.updateProjectionMatrix();
+  
+  renderer.setScissor(0, 0, WW, HH);
+  renderer.clear();
+  renderer.render(scene, camera);
+  //renderer.render(sceneHUD, cameraHUD);
+
+  renderer.setViewport(WW / 2, HH / 2, WW / 3, HH / 3);
+  renderer.setScissor(WW / 2, HH / 2, WW / 3, HH / 3);
+  // no need to set aspect (since it is still ONE)
+  renderer.clear();  // important!
+  renderer.render(sceneHUD, cameraHUD);
+  renderer.render(scene, camera);
+
+
+  renderer.setScissorTest(false);
+	// exercise
+  // change to a top-viewed minimap
+}
+
+
+</script>
+</body>
+
+</html>
