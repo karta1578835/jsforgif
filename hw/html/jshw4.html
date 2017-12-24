@@ -38,7 +38,7 @@ class Button {
     this.hsl = color.getHSL();
     this.obj = this.makeButton(name);
   }
-
+  
   get isOn() {
     return this.on;
   }
@@ -81,6 +81,7 @@ var camera, scene, renderer, controls, mesh;
 var raycaster = new THREE.Raycaster();
 var pickables = [];
 var mouse = new THREE.Vector2()
+count =0;
 
 init();
 animate();
@@ -109,7 +110,7 @@ function init() {
   floor.rotation.x = -Math.PI / 2;
   scene.add(floor);
   THREE.ImageUtils.crossOrigin = '';
-    floorlines = new THREE.MeshBasicMaterial({
+    floorlines = new THREE.MeshPhongMaterial({
         side: THREE.DoubleSide,
         transparent: true, // key to cutout texture
         map: THREE.ImageUtils.loadTexture('https://i.imgur.com/Tbwg9zv.jpg')
@@ -125,7 +126,7 @@ function init() {
   table.position.set (30, 50, 0);
   scene.add(table);
   THREE.ImageUtils.crossOrigin = '';
-    tablelines = new THREE.MeshBasicMaterial({
+    tablelines = new THREE.MeshPhongMaterial({
         side: THREE.DoubleSide,
         transparent: true, // key to cutout texture
         map: THREE.ImageUtils.loadTexture('https://i.imgur.com/LZnwPHv.png')
@@ -152,16 +153,16 @@ function init() {
     table6.position.set (80,50,0);
 	scene.add (table6);
 	
-  var cube1 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshLambertMaterial());
+  var cube1 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshPhongMaterial());
   cube1.position.set(60, 25, 30);
   scene.add (cube1)
-  var cube2 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshLambertMaterial());
+  var cube2 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshPhongMaterial());
   cube2.position.set(0, 25, 30);
   scene.add (cube2)
-  var cube3 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshLambertMaterial());
+  var cube3 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshPhongMaterial());
   cube3.position.set(60, 25, -30);
   scene.add (cube3)
-  var cube4 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshLambertMaterial());
+  var cube4 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshPhongMaterial());
   cube4.position.set(0, 25, -30);
   scene.add (cube4)
   
@@ -213,11 +214,12 @@ function init() {
   });
   ///////////////////////////////////////////////////////////
 
-  // spotlight  
+  // spotlight   
   light1 = new THREE.SpotLight(0xffffff, 1);
   light1.position.set(10, 85, -20);
   light1.angle = Math.PI / 4;
   light1.target = table;
+  light1.intensity=2;
   light1.penumbra = 0.6;
   light1.distance = 200;
   scene.add(light1);
@@ -229,11 +231,12 @@ function init() {
   light1.shadow.camera.far = 4000;	
   light1.shadow.camera.fov = 45;
   //scene.add(new THREE.SpotLightHelper(light1, 1));
-
+  
   light2 = new THREE.SpotLight(0xffffff, 1);
   light2.position.set(200, 250, 0);
   light2.angle = Math.PI / 4;
   //light2.target = table;
+  light2.intensity=2;
   light2.penumbra = 0.6;
   light2.distance = 1000;
   scene.add(light2);
@@ -307,6 +310,13 @@ function onDocumentMouseDown(event) {
   raycaster.setFromCamera(mouse, camera);
   var intersects = raycaster.intersectObjects(pickables, true);
   if (intersects.length > 0) {
+	count++;
+    if (count%2==1){ 
+	  light1.intensity=0;
+	}
+	if (count%2==0){ 
+	  light1.intensity=2;
+	}
 	let picked = intersects[0].object.parent.name;
     switch (picked) {
     case 'cyan':
@@ -315,6 +325,9 @@ function onDocumentMouseDown(event) {
     }
   }
 }
+
+
+
 
 function animate() {
   controls.update();
