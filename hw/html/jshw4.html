@@ -106,7 +106,12 @@ function init() {
   ///////////////////////////////////////////////////////////
 
   var floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400, 10, 10),
-    new THREE.MeshPhongMaterial());
+    new THREE.MeshPhongMaterial({
+	color: 0x999999,
+	polygonOffset: true,
+	polygonOffsetFactor: 1.0,
+	polygonOffsetUnits: 4.0,
+	}));
   floor.rotation.x = -Math.PI / 2;
   scene.add(floor);
   THREE.ImageUtils.crossOrigin = '';
@@ -122,7 +127,12 @@ function init() {
 	scene.add(floor1);
   
   var table = new THREE.Mesh(new THREE.BoxGeometry(100, 5, 100),
-   new THREE.MeshPhongMaterial());
+   new THREE.MeshPhongMaterial({
+	color: 0x999999,
+	polygonOffset: true,
+	polygonOffsetFactor: 1.0,
+	polygonOffsetUnits: 4.0,
+	}));
   table.position.set (30, 50, 0);
   scene.add(table);
   THREE.ImageUtils.crossOrigin = '';
