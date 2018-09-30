@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <style>
+  #info {
+  position: absolute;
+  top: 2%;
+  width: 100%;
+  padding: 8px;
+  text-align: center;
+  color: #ffff00
+}
+body {
+  overflow: hidden;
+}
+
+</style> 
+</head>
+<body>
+
+<div id="info">
+  <button id="turnButton" style="width:10%">Stop</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+  var renderer, camera, controls, scene;
+var angle;
+var train;
+var stop = false;
+
+init();
+animate();
+
+
+$("#turnButton").click(function() {
+  stop = !stop;
+  if (stop) { 
+    $('#turnButton').text('Turn');
+  } else {
+    $('#turnButton').text('Stop');
+
+  }
+});
+
+
+function init() {
+	renderer = new THREE.WebGLRenderer({
+	  antialias: true
+	});
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.setClearColor(0x888888);
+	document.body.appendChild(renderer.domElement);
+	camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+	camera.position.z = 50;  // important
+
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	scene = new THREE.Scene();
+	  
+	let gridXZ = new THREE.GridHelper(100, 10, 'red', 'white');
+	scene.add(gridXZ);
+
+	let axes = new THREE.AxisHelper (20);
+	scene.add (axes);
+  //////////
+    THREE.ImageUtils.crossOrigin = '';
+    trainface = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/klJEcUU.jpg')
+    });
+    THREE.ImageUtils.crossOrigin = '';
+    railcorner = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/QDypvjq.png')
+    });
+  
+  THREE.ImageUtils.crossOrigin = '';
+    rails = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/6nLknrD.png')
+    });
+  
+  
+  ///////
+	train = new THREE.Group();
+  let geometry = new THREE.BoxGeometry (30, 5, 13)
+  let material = new THREE.MeshBasicMaterial({color: 0xf11119});
+  mesh = new THREE.Mesh (geometry, material)
+  //scene.add (mesh)
+  train.position.y = 5
+
+	let block = new THREE.Mesh (new THREE.BoxGeometry(18,10,10), new THREE.MeshBasicMaterial({color: 0x199FFF}));
+  block.position.y = 5;
+  block.position.x = 1
+  train.add (block);
+  
+  let tirer1 = new THREE.Mesh (new THREE.CylinderGeometry(4, 4, 2, 32 ), new 	THREE.MeshBasicMaterial({color: 0x199FFF}));
+  tirer1.rotation.x=Math.PI/2;
+  tirer1.position.y = -1
+  tirer1.position.x = 10
+  tirer1.position.z = 7.5
+  train.add (tirer1);
+  
+  let tirer2 = new THREE.Mesh (new THREE.CylinderGeometry(4, 4, 2, 32 ), new THREE.MeshBasicMaterial({color: 0x199FFF}));
+  tirer2.rotation.x=Math.PI/2;
+  tirer2.position.y = -1
+  tirer2.position.x = -9
+  tirer2.position.z = 7.5
+  train.add (tirer2);
+  
+  let tirerm = new THREE.Mesh (new THREE.CylinderGeometry(4, 4, 2, 32 ), new THREE.MeshBasicMaterial({color: 0x199FFF}));
+  tirerm.rotation.x=Math.PI/2;
+  tirerm.position.y = -1
+  tirerm.position.x = 0.5
+  tirerm.position.z = 7.5
+  train.add (tirerm);
+  
+  let tirerblock = new THREE.Mesh (new THREE.BoxGeometry(20,1.5,0.3), new THREE.MeshBasicMaterial({color: 0x999999}));
+  tirerblock.position.y = -0.5;
+  tirerblock.position.x = 1
+  tirerblock.position.z = 8.5
+  train.add  (tirerblock);
+  
+  let tiref1 = new THREE.Mesh (new THREE.CylinderGeometry(4, 4, 2, 32 ), new THREE.MeshBasicMaterial({color: 0x199FFF}));
+  tiref1.rotation.x=Math.PI/2;
+  tiref1.position.y = -1
+  tiref1.position.x = 10
+  tiref1.position.z = -7.5
+  train.add (tiref1);
+  
+  let tiref2 = new THREE.Mesh (new THREE.CylinderGeometry(4, 4, 2, 32 ), new THREE.MeshBasicMaterial({color: 0x199FFF}));
+  tiref2.rotation.x=Math.PI/2;
+  tiref2.position.y = -1
+  tiref2.position.x = -9
+  tiref2.position.z = -7.5
+  train.add (tiref2);
+  
+  let tirefm = new THREE.Mesh (new THREE.CylinderGeometry(4, 4, 2, 32 ), new THREE.MeshBasicMaterial({color: 0x199FFF}));
+  tirefm.rotation.x=Math.PI/2;
+  tirefm.position.y = -1
+  tirefm.position.x = 0.5
+  tirefm.position.z = -7.5
+  train.add (tirefm);
+  
+  let tirefblock = new THREE.Mesh (new THREE.BoxGeometry(20,1.5,0.3), new THREE.MeshBasicMaterial({color: 0x999999}));
+  tirefblock.position.y = -0.5;
+  tirefblock.position.x = 1
+  tirefblock.position.z = -8.5
+  train.add  (tirefblock);
+  
+  let head = new THREE.Mesh (new THREE.CylinderGeometry(4, 4, 4, 32 ), new THREE.MeshBasicMaterial({color: 0x000000}));
+  head.rotation.z=Math.PI/2;
+  head.position.y = 6.5
+  head.position.x = 12
+  train.add (head);
+  
+  let headface = new THREE.Mesh (new THREE.CylinderGeometry(4, 4, 0.1, 32 ), trainface);
+  headface.rotation.z=Math.PI/2;
+  headface.position.y = 6.5
+  headface.position.x = 14
+  train.add (headface);
+  
+  let headlight = new THREE.Mesh (new THREE.CylinderGeometry(1, 1, 1, 32 ), new THREE.MeshBasicMaterial({color: 0xFFF111}));
+  headlight.rotation.z=Math.PI/2;
+  headlight.position.y = 1
+  headlight.position.x = 15.5
+  headlight.position.z = 0
+  train.add (headlight);
+  
+  let backblock = new THREE.Mesh (new THREE.BoxGeometry(0.5,2,5), new THREE.MeshBasicMaterial({color: 0x000000}));
+  backblock.position.y = -0.5;
+  backblock.position.x = -15
+  backblock.position.z = 0
+  train.add  (backblock);
+  
+  let chimney = new THREE.Mesh (new THREE.BoxGeometry(2,3,2), new THREE.MeshBasicMaterial({color: 0x000000}));
+  chimney.position.y = 11.5;
+  chimney.position.x = 12.5
+  train.add (chimney);
+  
+  
+  
+  train.add (mesh);
+  
+  scene.add (train);
+  
+	angle = 0;
+  /////
+  
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400, 130, 130),
+    new THREE.MeshLambertMaterial());
+  floor.rotation.x = -Math.PI / 2;
+  scene.add(floor);
+
+var rail1 = new THREE.Mesh(new THREE.PlaneGeometry(33, 33, 130, 130),
+   railcorner);
+  rail1.rotation.x = -Math.PI / 2;
+  rail1.rotation.z = -Math.PI / 2;
+  rail1.position.set( 32, 0.11, -32 );
+  scene.add(rail1);
+  
+	var rail2 = new THREE.Mesh(new THREE.PlaneGeometry(33, 33, 130, 130),
+   railcorner);
+  rail2.rotation.x = -Math.PI / 2;
+  rail2.position.set( -32, 0.11, -32 );
+  scene.add(rail2);
+
+var rail3 = new THREE.Mesh(new THREE.PlaneGeometry(33, 33, 130, 130),
+   railcorner);
+  rail3.rotation.x = -Math.PI / 2;
+  rail3.rotation.z = Math.PI / 2;
+  rail3.position.set( -32, 0.11, 32 );
+  scene.add(rail3);
+  
+  var rail4 = new THREE.Mesh(new THREE.PlaneGeometry(33, 33, 130, 130),
+   railcorner);
+  rail4.rotation.x = Math.PI / 2;
+  rail4.rotation.z = -Math.PI / 2;
+  rail4.position.set( 32, 0.11, 32 );
+  scene.add(rail4);
+  
+  var rail34 = new THREE.Mesh(new THREE.PlaneGeometry(25, 31, 130, 130),
+   rails);
+  rail34.rotation.x = Math.PI / 2;
+  rail34.rotation.z = -Math.PI / 2;
+  rail34.position.set( 0, 0.1, 35 );
+  scene.add(rail34);
+
+var rail12 = new THREE.Mesh(new THREE.PlaneGeometry(25, 31, 130, 130),
+   rails);
+  rail12.rotation.x = Math.PI / 2;
+  rail12.rotation.z = -Math.PI / 2;
+  rail12.position.set( 0, 0.1, -35 );
+  scene.add(rail12);
+  
+  var rail23 = new THREE.Mesh(new THREE.PlaneGeometry(25, 31, 130, 130),
+   rails);
+  rail23.rotation.x = Math.PI / 2;
+  rail23.position.set( -35, 0.1, 0 );
+  scene.add(rail23);
+
+var rail14 = new THREE.Mesh(new THREE.PlaneGeometry(25, 31, 130, 130),
+   rails);
+  rail14.rotation.x = Math.PI / 2;
+  rail14.position.set( 35, 0.1, 0 );
+  scene.add(rail14);
+
+ ///
+ let target1 = new THREE.Mesh (new THREE.CylinderGeometry(0.01, 0.01, 0.01, 32 ), new THREE.MeshBasicMaterial({color: 0x000000}));
+  target1.rotation.z=Math.PI/2;
+  target1.position.y = 2
+  target1.position.x = 16
+  target1.position.z = 0
+  train.add (target1);
+ 
+ // spotlight   
+				var ambient = new THREE.AmbientLight( 0xffffff, 0.8 );
+				scene.add( ambient );
+				spotLight = new THREE.SpotLight( 0xffffff, 1 );
+				spotLight.position.set( 0, 2, 0 );
+        spotLight.target = target1;
+				spotLight.angle = Math.PI / 8;
+				spotLight.penumbra = 0.05;
+				spotLight.decay = 2;
+				spotLight.distance = 250;
+				spotLight.castShadow = true;
+				spotLight.shadow.mapSize.width = 1024;
+				spotLight.shadow.mapSize.height = 1024;
+				spotLight.shadow.camera.near = 10;
+				spotLight.shadow.camera.far = 20;
+				train.add (spotLight);
+        //scene.add( spotLight );
+				/*lightHelper = new THREE.SpotLightHelper( spotLight );
+				scene.add( lightHelper );*/
+				/*shadowCameraHelper = new THREE.CameraHelper( spotLight.shadow.camera );
+				scene.add( shadowCameraHelper );*/
+        
+        renderer.shadowMap.enabled = true;
+  		  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  			floor.receiveShadow = true;
+        rail1.receiveShadow = true;
+        rail2.receiveShadow = true;
+        rail3.receiveShadow = true;
+        rail4.receiveShadow = true;
+			
+  
+}
+
+function animate() {
+  controls.update();
+  renderer.render (scene, camera);
+
+  if (!stop) {    
+		angle = angle + 0.01;  // radian
+		train.rotation.y = angle + Math.PI/2;
+  	//console.log (angle)
+  
+  	train.position.set (35*Math.cos(angle), 5, -35*Math.sin(angle));
+  
+  }
+  requestAnimationFrame (animate);
+}
+
+
+</script>
+</body>
+</html>
