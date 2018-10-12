@@ -21,7 +21,7 @@ body {
 <div id="info">
 <p>Cones</p>
 <button id="view" style="width:20%" value = 'switch'>god view</button>
-<br> speed:   
+<br> speed: <p id='show'> </p> 
  <br>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
@@ -343,7 +343,8 @@ function animate() {
 		camera.lookAt( car.position );
 	}
 
-	
+  popo = speed;
+  $("#show").text (popo);
 
   requestAnimationFrame(animate);
   render();
