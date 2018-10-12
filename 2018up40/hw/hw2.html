@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <style>
+  #info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+
+body {
+  overflow: hidden;
+}
+
+</style>
+</head>
+
+<div id="info">
+<p>Cones</p>
+<button id="view" style="width:20%" value = 'switch'>god view</button>
+<br> speed:   
+ <br>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>	
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+var camera, scene, renderer, mesh, controls;
+var keyboard = new KeyboardState();
+var clock;
+var car;
+var pos = new THREE.Vector3();
+var speed, angle, vel;
+var views;
+var a=0;
+var h=0;
+
+$("#view").click(function() {	
+	if(views){ // is turning
+		$('#view').text('god view');
+    //camera.position.copy(car.localToWorld(new THREE.Vector3(0, 500, 0)));
+    a=0;
+  }
+	else{
+		$('#view').text('third-person view');	
+    //camera.position.copy(car.localToWorld(new THREE.Vector3(-80, 200, 0)));
+    a=1;
+  }
+  views = !views;
+});
+
+(function() {
+  Math.clamp = function(val,min,max){
+    return Math.min(Math.max(val,min),max);
+    
+  }})();
+  
+init();
+animate();
+
+function buildVehicle() {
+  var car = new THREE.Object3D();
+  
+  var geometry = new THREE.ConeGeometry( 5, 20, 3 );
+	var material = new THREE.MeshNormalMaterial/*MeshBasicMaterial( {color: 0x199FFF} )*/;
+	var cone = new THREE.Mesh( geometry, material );
+	cone.rotation.z = -Math.PI/2;
+  cone.rotation.x = -Math.PI/2;
+  cone.position.y = 2;
+  //scene.add( cone );
+	car.add(cone);
+  
+  /*var mat = new THREE.MeshNormalMaterial();
+  var body = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 2, 20), mat);
+  body.position.y = 5;
+  car.add(body);
+  var pointer = new THREE.Mesh(new THREE.BoxGeometry(10, 2, 2), mat);
+  car.add(pointer);
+  pointer.position.x = 5;
+  pointer.position.y = 5;*/
+  return car;
+}
+
+function init() {
+
+  clock = new THREE.Clock();
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.z = 0;
+  camera.position.y = 350;
+
+  var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+  scene.add(gridXZ);
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  
+  controls.enableKeys = false;
+  
+  document.body.appendChild(renderer.domElement);
+  ////////////////////////////////////////////////////////////////////////
+  speed = 0.1;
+  angle = 0.0;
+  	
+  car = buildVehicle();
+  scene.add(car)
+
+	/////////////////////////////////
+  THREE.ImageUtils.crossOrigin = '';
+    ttuface = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/E9eaD52.jpg')
+    });
+    
+    THREE.ImageUtils.crossOrigin = '';
+    road = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/d349m38.jpg')
+    });
+    
+    THREE.ImageUtils.crossOrigin = '';
+    se = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/MpY4ohN.jpg')
+    });
+    
+    THREE.ImageUtils.crossOrigin = '';
+    YOUNG = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/Uiyas9v.jpg')
+    });
+    
+    THREE.ImageUtils.crossOrigin = '';
+    OLD = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/HZWRXqa.jpg')
+    });
+  ////////////////////////////////
+  
+  let ttu = new THREE.Mesh (new THREE.BoxGeometry(50,20,150), ttuface);
+  ttu.position.y = 10
+  ttu.position.x = -70
+  ttu.position.z = 0
+  scene.add (ttu);
+  
+  let shop = new THREE.Mesh (new THREE.BoxGeometry(20,20,20), se);
+  shop.position.y = 10
+  shop.position.x = 60
+  shop.position.z = 20
+  scene.add (shop);
+  
+  let nroom = new THREE.Mesh (new THREE.BoxGeometry(20,20,20), YOUNG);
+  nroom.position.y = 10
+  nroom.position.x = 80
+  nroom.position.z = -20
+  scene.add (nroom);
+  
+  let oroom = new THREE.Mesh (new THREE.BoxGeometry(20,20,20), OLD);
+  oroom.position.y = 10
+  oroom.position.x = 70
+  oroom.position.z = -50
+  scene.add (oroom);
+  
+  let target1 = new THREE.Mesh (new THREE.CylinderGeometry(0.01, 0.01, 0.01, 32 ), 	 new THREE.MeshBasicMaterial({color: 0x000000}));
+  target1.rotation.z=Math.PI/2;
+  target1.position.y = 0
+  target1.position.x = 0
+  target1.position.z = 0
+  scene.add (target1);
+  
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400, 130, 130),
+    new THREE.MeshLambertMaterial());
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -1;
+  scene.add(floor);
+  
+  var derhi = new THREE.Mesh(new THREE.PlaneGeometry(250, 15, 130, 130),
+    road);
+  derhi.rotation.x = -Math.PI / 2;
+  derhi.position.x = 70;
+  derhi.position.y = 0.1;
+  scene.add(derhi);
+  
+  var Jungshan = new THREE.Mesh(new THREE.PlaneGeometry(500, 15, 130, 130),
+    road);
+  Jungshan.rotation.x = -Math.PI / 2;
+  Jungshan.rotation.z = -Math.PI / 2;
+  Jungshan.position.x = 3;
+  Jungshan.position.z = 0;
+  Jungshan.position.y = 0.11;
+  scene.add(Jungshan);
+  
+  var Jungshan2 = new THREE.Mesh(new THREE.PlaneGeometry(500, 15, 130, 130),
+    road);
+  Jungshan2.rotation.x = -Math.PI / 2;
+  Jungshan2.rotation.z = -Math.PI / 2;
+  Jungshan2.position.x = -13.5;
+  Jungshan2.position.z = 0;
+  Jungshan2.position.y = 0.11;
+  scene.add(Jungshan2);
+  
+  var Jungshan3 = new THREE.Mesh(new THREE.PlaneGeometry(500, 15, 130, 130),
+    road);
+  Jungshan3.rotation.x = -Math.PI / 2;
+  Jungshan3.rotation.z = -Math.PI / 2;
+  Jungshan3.position.x = -30;
+  Jungshan3.position.z = 0;
+  Jungshan3.position.y = 0.11;
+  scene.add(Jungshan3);
+  
+  var Minquan  = new THREE.Mesh(new THREE.PlaneGeometry(400, 15, 130, 130),
+    road);
+  Minquan.rotation.x = -Math.PI / 2;
+  Minquan.position.x = 0;
+  Minquan.position.y = 0.1;
+  Minquan.position.z = -100;
+  scene.add(Minquan);
+  
+  var Minquan1  = new THREE.Mesh(new THREE.PlaneGeometry(400, 15, 130, 130),
+    road);
+  Minquan1.rotation.x = -Math.PI / 2;
+  Minquan1.position.x = 0;
+  Minquan1.position.y = 0.1;
+  Minquan1.position.z = 200;
+  scene.add(Minquan1);
+  
+  var ambient = new THREE.AmbientLight( 0xffffff, 0.8 );
+	scene.add( ambient );
+	spotLight = new THREE.SpotLight( 0xffffff, 1 );
+	spotLight.position.set( 0, 100, 0 );
+  spotLight.target = target1;
+	spotLight.angle = Math.PI / 2;
+	spotLight.penumbra = 0.05;
+	spotLight.decay =3.7;
+	spotLight.distance = 250;
+	spotLight.castShadow = true;
+	spotLight.shadow.mapSize.width = 1024;
+	spotLight.shadow.mapSize.height = 1024;
+	spotLight.shadow.camera.near = 10;
+	spotLight.shadow.camera.far = 20;
+  scene.add(spotLight);
+
+  //scene.add(new THREE.AmbientLight(0x440000)); // soft red ambient
+  
+  
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  floor.receiveShadow = true;
+
+}
+
+function update(dt) {
+
+  keyboard.update();
+  
+if ( keyboard.pressed("home") ) {
+		if(h==0) speed = 5;
+    h = 1;
+}
+if(h==1) {  
+  if ( keyboard.pressed("left") ) 
+		angle += 0.01;               
+	if ( keyboard.pressed("right") )
+		angle -= 0.01;               
+	if ( keyboard.pressed("up") )  
+		speed += 0.5;        
+	if ( keyboard.pressed("down") )  
+		speed -= 0.5;    
+}
+   if ( keyboard.pressed("space") ){  
+			h = 0;
+      speed = 0;
+   }
+
+
+	speed = Math.clamp (speed, 0.5, 20.0);		
+	vel = new THREE.Vector3(speed,0,0);
+	
+	vel.applyAxisAngle (new THREE.Vector3(0,1,0), angle);
+	pos.add (vel.clone().multiplyScalar(dt)); 	
+
+
+
+}
+
+function animate() {
+
+  controls.update();
+
+  var dt = clock.getDelta();
+  update(dt);
+
+  // car update
+  car.position.copy(pos);
+  car.rotation.y = angle;
+  
+  /*var dir = new THREE.Vector3(1,0,0);
+	dir.multiplyScalar (dt*speed);	//dir *= dt*speed;
+	dir.applyAxisAngle (new THREE.Vector3(0,1,0), angle);
+	pos.add (dir); 	//pos = pos + dir;*/
+	if (a==0) { 
+		/*car.scale.set (0.2,0.2,0.2);
+		car.position.set (pos.x, pos.y, pos.z);
+		car.rotation.y = (angle+Math.PI/2);*/
+
+		
+    var relativeCameraOffset = new THREE.Vector3 (0,300,0);
+		var cameraOffset = relativeCameraOffset.applyMatrix4( car.matrixWorld );
+
+		camera.position.x = cameraOffset.x;
+		camera.position.y = cameraOffset.y;
+		camera.position.z = cameraOffset.z;
+		camera.lookAt( car.position );
+	}
+  
+  if (a==1) { 
+		/*car.scale.set (0.2,0.2,0.2);
+		car.position.set (pos.x, pos.y, pos.z);
+		car.rotation.y = (angle+Math.PI/2);*/
+
+		
+    var relativeCameraOffset = new THREE.Vector3 (-100,70,0);
+		var cameraOffset = relativeCameraOffset.applyMatrix4( car.matrixWorld );
+
+		camera.position.x = cameraOffset.x;
+		camera.position.y = cameraOffset.y;
+		camera.position.z = cameraOffset.z;
+		camera.lookAt( car.position );
+	}
+
+	
+
+  requestAnimationFrame(animate);
+  render();
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+
+</html>
