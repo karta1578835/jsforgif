@@ -21,7 +21,7 @@ body {
 </head>
 <body>
 
-<div id="info">Level 0<br>
+<div id="info">Level 2<br>
 	<strong>shift + click</strong>: rotate <br>
 </div>
 
@@ -76,6 +76,50 @@ class Ball {
   }
 }
 
+class Ballb {
+	constructor (center,rad=2,mass) {
+  	this.type = 'ball';
+	this.center = center;
+    this.mass = mass||6;  // may need to differentiate basketball & bowling ball
+  	this.rad = rad;
+    
+    // for dynamics calculation
+    this.pos = new THREE.Vector3();
+    this.vel = new THREE.Vector3();
+    this.force = new THREE.Vector3();
+
+		this.obj = new THREE.Object3D();
+    let mesh = new THREE.Mesh (new THREE.CircleGeometry(rad,12), new THREE.MeshBasicMaterial({
+	//wireframe:true,
+	map: THREE.ImageUtils.loadTexture('https://i.imgur.com/ulKXxcL.png')
+	}))
+	
+    this.obj.add (mesh)
+    scene.add (this.obj)
+  }
+  
+  update(dt) {
+
+		// after GLOBAL collision & contact
+    
+  	this.vel.add (this.force.clone().multiplyScalar(dt))
+    this.pos.add (this.vel.clone().multiplyScalar(dt))
+
+ 		this.obj.position.copy (this.pos);
+		this.center.copy (this.pos);
+		//console.log(this.center);
+  }
+
+	// useless API
+  moveTo(x,y) {
+	
+	this.center.x = x;
+    this.center.y = y;
+	this.obj.position.copy (this.center)  
+  	this.pos.set (x,y,0)
+  }
+}
+
 class Rect {
 	constructor (center, sizes,name,number,resCoeff) {
 	this.type = 'rect';
@@ -87,7 +131,7 @@ class Rect {
     this.sizes = sizes;
 	this.name = name||'origin'
 	this.number = number||"0";
-	this.resCoeff = resCoeff||0.9
+	this.resCoeff = resCoeff||0.5
 /* 
  		this.max = center.clone().add ( this.axes[0].clone().multiplyScalar(sizes[0]/2) )
               .add( this.axes[1].clone().multiplyScalar(sizes[1]/2) );
@@ -150,18 +194,31 @@ class ggrect {
     this.sizes = sizes;
 	this.name = name||'origin'
 	this.number = number||"0";
-	this.resCoeff = resCoeff||0.9
+	this.resCoeff = resCoeff||0.5
 /* 
  		this.max = center.clone().add ( this.axes[0].clone().multiplyScalar(sizes[0]/2) )
               .add( this.axes[1].clone().multiplyScalar(sizes[1]/2) );
     this.min = center.clone().add (center.clone().sub(this.max));     
 */    
+	
+	
+	let loader = new THREE.TextureLoader()
+	loader.crossOrigin = '';
+	
+	var texture1 = loader.load('https://i.imgur.com/lc8tr9N.png');
+	texture1.repeat.set(sizes[0]/10, 1);
+	texture1.wrapS = THREE.RepeatWrapping;
+	texture1.wrapT = THREE.RepeatWrapping;
+	
+	
+	
 	THREE.ImageUtils.crossOrigin = '';
     this.mesh = new THREE.Mesh (new THREE.PlaneGeometry (sizes[0],sizes[1]), new THREE.MeshBasicMaterial({
 	side: THREE.DoubleSide,
     transparent: true, // key to cutout texture
     //map: THREE.ImageUtils.loadTexture('https://e.share.photo.xuite.net/s22040413/1e5f3bd/4122842/156977891_m.jpg')
-	color : 'red'
+	map: texture1
+	//color : 'red'
 	}))
     //this.mesh.position.copy (center);
 	this.mesh.name = this.name;
@@ -191,6 +248,71 @@ class ggrect {
   }
   
 }
+
+class Ttrect {
+	constructor (center, sizes,name,number,resCoeff) {
+	this.type = 'rect';
+	this.normal = new THREE.Vector3(0,1,0)
+	this.pc = new THREE.Vector3(0,1,0)
+	this.obj = new THREE.Object3D();
+  	this.center = center;
+    this.axes = [new THREE.Vector3(1,0,0), new THREE.Vector3(0,1,0)]
+    this.sizes = sizes;
+	this.name = name||'origin'
+	this.number = number||"0";
+	this.resCoeff = resCoeff||1.2
+/* 
+ 		this.max = center.clone().add ( this.axes[0].clone().multiplyScalar(sizes[0]/2) )
+              .add( this.axes[1].clone().multiplyScalar(sizes[1]/2) );
+    this.min = center.clone().add (center.clone().sub(this.max));     
+*/    
+
+	let loader = new THREE.TextureLoader()
+	loader.crossOrigin = '';
+	
+	var texture = loader.load('https://i.imgur.com/AvD3b7X.jpg');
+	texture.repeat.set(sizes[0]/15, 1);
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+	
+	THREE.ImageUtils.crossOrigin = '';
+    this.mesh = new THREE.Mesh (new THREE.PlaneGeometry (sizes[0],sizes[1]), new THREE.MeshBasicMaterial({
+	side: THREE.DoubleSide,
+    transparent: true, // key to cutout texture
+    map: texture
+	}))
+    //this.mesh.position.copy (center);
+	this.mesh.name = this.name;
+	this.mesh.number = this.number
+	this.obj.name = this.name;
+	this.obj.add (this.mesh);
+    scene.add (this.obj)
+  }
+  
+  moveTo (x,y) {
+	
+	this.pc.set (x, y, 0);
+    //this.mesh.position.copy (this.pc);
+	this.obj.position.copy (this.pc);
+	this.center.copy (this.pc);
+	//console.log(this.center);
+  }
+  rotateTo (theta) {  // about +Z
+  
+  	let euler = new THREE.Euler(0,0,theta)
+	
+  	this.axes[0].copy (new THREE.Vector3(1,0,0).applyEuler (euler))
+  	this.axes[1].copy (new THREE.Vector3(0,1,0).applyEuler (euler))
+		//this.mesh.rotation.z = theta;
+		this.obj.rotation.z = theta;
+		this.normal.applyEuler (new THREE.Euler (0,0,theta))
+
+		
+  }
+  
+}
+
+
 
 
 function checkIntersect (rect, ball) {
@@ -236,13 +358,32 @@ function numtest(num1,num2) {
 }
 
 function smallRE() {
-   ball0.moveTo (-15,50)
+   ball0.moveTo (-90,60)
    ball0.vel = new THREE.Vector3();
+   
+   ball1.moveTo (-155,100)
+   ball1.vel = new THREE.Vector3();
 }
 
 function bigRE() {
-	ccrect.moveTo (-135,20)
+	
+	ccrect.moveTo (-200,50)
 	ccrect.rotateTo(0)
+	
+	ccrect1.moveTo (-200,35)
+	ccrect1.rotateTo(0)	
+	
+	ccrect2.moveTo (-200,20)
+	ccrect2.rotateTo(0)
+	
+	ccrect3.moveTo (-200,5)
+	ccrect3.rotateTo(0)
+	
+	ccrect4.moveTo (-200,-10)
+	ccrect4.rotateTo(0)
+	
+	ccrect5.moveTo (-200,-25)
+	ccrect5.rotateTo(0)
 	for(var g = 0 ; g<angle.length;g++){
 	angle[g] = 0;
 	}
@@ -626,12 +767,12 @@ var pickables = [];
 var cube = [];
 var movetest;
 var keyboard = new KeyboardState();
-var ball0,ccrect,texture;
+var ball0,ba111,ccrect,ccrect1,ccrect2,ccrect3,ccrect4,ccrect5,texture;
 init();
 animate();
 
 function init() {
-  renderer = new THREE.WebGLRenderer({ alpha: true });//alpha: true 透明背景
+  renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(0x888888,0);
   document.body.appendChild(renderer.domElement);
@@ -664,14 +805,50 @@ function init() {
 	
 	
 	var rect = new Rect(new THREE.Vector3(15,22,0), [45,10]);
-   //rect.rotateTo (-5.2)
-    rect.moveTo (55,-10)
-	
-	var rect1 = new Rect(new THREE.Vector3(15,22,0), [15,10]);
-	rect1.moveTo (-20, 42)
-	rect1.rotateTo (-Math.PI/4)
+    rect.moveTo (-105,50)
+	var rect1 = new Rect(new THREE.Vector3(15,22,0), [45,10]);
+	rect1.moveTo (-35, 50)
 	var rect2 = new Rect(new THREE.Vector3(15,22,0), [75,10]);
-	rect2.moveTo (-50, -10)
+	rect2.moveTo (-100, 20)
+	var rect3 = new Rect(new THREE.Vector3(15,22,0), [75,10]);
+	rect3.moveTo (-60, -10)
+	var rect4 = new Rect(new THREE.Vector3(15,22,0), [30,10]);
+	rect4.moveTo (-82.5, -65)
+	var rect5 = new Rect(new THREE.Vector3(15,22,0), [30,10]);
+	rect5.moveTo (70, 50)
+    
+	var rectc = new Rect(new THREE.Vector3(15,22,0), [45,10]);
+    //rect.rotateTo (-5.2)
+    rectc.moveTo (-17.5,77.5)
+	rectc.rotateTo (Math.PI/2)
+	var rectc1 = new Rect(new THREE.Vector3(15,22,0), [30,10]);
+	rectc1.moveTo (-132.5, 40)
+	rectc1.rotateTo (Math.PI/2)
+	var rectc2 = new Rect(new THREE.Vector3(15,22,0), [105,10]);
+	rectc2.moveTo (-17.5, -7.5)
+	rectc2.rotateTo (Math.PI/2)
+	var rectc3 = new Rect(new THREE.Vector3(15,22,0), [30,10]);
+	rectc3.moveTo (-132.5, -20)
+	rectc3.rotateTo (Math.PI/2)
+	var rectc4 = new Rect(new THREE.Vector3(15,22,0), [30,10]);
+	rectc4.moveTo (-92.5, -85)
+	rectc4.rotateTo (Math.PI/2)
+	var rectc5 = new Rect(new THREE.Vector3(15,22,0), [30,10]);
+	rectc5.moveTo (-17.5, -100)
+	rectc5.rotateTo (Math.PI/2)
+	var rectc6 = new Rect(new THREE.Vector3(15,22,0), [60,10]);
+	rectc6.moveTo (87.5, 25)
+	rectc6.rotateTo (Math.PI/2)
+    
+	var rectt = new Ttrect(new THREE.Vector3(15,22,0), [15,10]);
+	rectt.moveTo (-2.5, -100)
+	rectt.rotateTo (-Math.PI/4)
+	var rectt1 = new Ttrect(new THREE.Vector3(15,22,0), [15,10]);
+	rectt1.moveTo (82.5, -55)
+	rectt1.rotateTo (Math.PI/4)
+	var rectt2 = new Ttrect(new THREE.Vector3(15,22,0), [15,10]);
+	rectt2.moveTo (-2.5, 0)
+	rectt2.rotateTo (-Math.PI/4)
 	//rect2.rotateTo (Math.PI/2)
 	/*
 	var rect3 = new Rect(new THREE.Vector3(15,22,0), [30,10]);
@@ -681,42 +858,59 @@ function init() {
 	rect4.moveTo (-20, -10)
 	//rect4.rotateTo (Math.PI/2)
 	*/
-    ball0 = new Ball(new THREE.Vector3(),4);
-    ball0.moveTo (-15,50)
- 	/*let ball1 = new Ball(new THREE.Vector3(),3,5);
- 	ball1.moveTo (-9,60)
-	*/
-	objects = [rect,ball0,rect1,rect2]
+    ball0 = new Ball(new THREE.Vector3(),8);
+    ball0.moveTo (-90,60)
+ 	
+	ball1 = new Ballb(new THREE.Vector3(),8,3);
+ 	ball1.moveTo (-155,100)
+	
+	objects = [rect,ball0,ball1,rect1,rect2,rect3,rect4,rect5,rectc,rectc1,rectc2,rectc3,rectc4,rectc5,rectc6,rectt,rectt1,rectt2]
 	cube = [];
-    balls = [ball0]
+    balls = [ball0,ball1]
 	console.log(rect)
 	//rect.rotateTo(Math.PI/2)
 ////////////////////////////////////////////////////////////
 	ccrect = new Rect(new THREE.Vector3(15,22,0), [15,10],"myccrect","1");
-	ccrect.moveTo (-135,20)
+	ccrect.moveTo (-200,50)
 	objects.push(ccrect)
 	cube.push(ccrect)
 		
   
-	/*var ccrect2 = new Rect(new THREE.Vector3(15,22,0), [20,10],"myccrect","2");
-	ccrect2.moveTo (-135,50)
+	ccrect1 = new Rect(new THREE.Vector3(15,22,0), [15,10],"myccrect","2");
+	ccrect1.moveTo (-200,35)
+	objects.push(ccrect1)
+	cube.push(ccrect1)
+	
+	ccrect2 = new Rect(new THREE.Vector3(15,22,0), [15,10],"myccrect","3");
+	ccrect2.moveTo (-200,20)
 	objects.push(ccrect2)
-	cube.push(ccrect2)*/
+	cube.push(ccrect2)
+	
+	ccrect3 = new Ttrect(new THREE.Vector3(15,22,0), [15,10],"myccrect","4");
+	ccrect3.moveTo (-200,5)
+	objects.push(ccrect3)
+	cube.push(ccrect3)
+	
+	ccrect4 = new Ttrect(new THREE.Vector3(15,22,0), [15,10],"myccrect","5");
+	ccrect4.moveTo (-200,-10)
+	objects.push(ccrect4)
+	cube.push(ccrect4)
+	
+	ccrect5 = new Ttrect(new THREE.Vector3(15,22,0), [15,10],"myccrect","6");
+	ccrect5.moveTo (-200,-25)
+	objects.push(ccrect5)
+	cube.push(ccrect5)
 	
   
   
 	var finishss = new ggrect(new THREE.Vector3(15,22,0), [10,7.5]);
-	finishss.moveTo (60,-1.5)
+	finishss.moveTo (87.5,57.5)
 	//finishss.mesh.material.color = (0xffffff)
 	objects.push(finishss)
 	
 	console.log(finishss)
 	
 	
-  let brickf = new THREE.Mesh (new THREE.BoxGeometry(15,10,0), new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true }));
-  brickf.name = "mybrickf";
-  brickf.position.set (10,-10,10);
-  scene.add(brickf);
   
 	
  
@@ -729,7 +923,7 @@ function init() {
   }));
   //scene.add(plane);
   plane.name = 'myplane'
-  pickables = [finishss.obj,ccrect.obj,rect.obj,rect1.obj,rect2.obj];
+  pickables = [finishss.obj,ccrect.obj,ccrect1.obj,ccrect2.obj,ccrect3.obj,ccrect4.obj,ccrect5.obj,rect.obj,rect1.obj,rect2.obj,rect3.obj,rect4.obj,rect5.obj,rectc.obj,rectc1.obj,rectc2.obj,rectc3.obj,rectc4.obj,rectc5.obj,rectc6.obj];
   pickables.push(plane);
   //console.log(pickables)
 
