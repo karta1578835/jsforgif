@@ -1,8 +1,7 @@
-<!DOCTYPE html>
-<html >
+<html>
 <head>
-  <style>
-  #info {
+<style>
+#info {
   position: absolute;
   top: 0px;
   width: 100%;
@@ -10,189 +9,80 @@
   text-align: center;
   color: #ffff00
 }
+#Score {
+  position: absolute;
+  top: 0px;
+  width: 150%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+#remainingTime {
+  position: absolute;
+  top: 0px;
+  width: 148.5%;
+  padding: 25px;
+  text-align: center;
+  color: #ffff00
+}
 
 body {
   overflow: hidden;
-  background-image: url(https://i.imgur.com/PaWt7bj.jpg);
 }
 
 
-</style> 
+</style>
 </head>
-<body>
 
-<div id="info">Level 0<br>
+<body> 
+
+<div id="info">phy games<br>
 	<strong>shift + click</strong>: rotate <br>
 </div>
+
+
+<div id="remainingTime">Time : 
+<p id='counter'style="position:absolute;top:10px;left:1385px"> </p>
+</div>
+
+<div id="Score">Score : 
+<p id='score1'style="position:absolute;top:-5px;left:1385px"> </p>
+</div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
 
-
+<script src="Ball.js"></script>
+<script src="Rect.js"></script>
+<script src="ggrect.js"></script>
 <script>
-class Ball {
-	constructor (center,rad=2,mass) {
-  	this.type = 'ball';
-	this.center = center;
-    this.mass = mass||10;  // may need to differentiate basketball & bowling ball
-  	this.rad = rad;
-    
-    // for dynamics calculation
-    this.pos = new THREE.Vector3();
-    this.vel = new THREE.Vector3();
-    this.force = new THREE.Vector3();
 
-		this.obj = new THREE.Object3D();
-    let mesh = new THREE.Mesh (new THREE.CircleGeometry(rad,12), new THREE.MeshBasicMaterial({
-	//wireframe:true,
-	map: THREE.ImageUtils.loadTexture('https://i.imgur.com/w70lw8v.png')
-	}))
-	
-    this.obj.add (mesh)
-    scene.add (this.obj)
-  }
-  
-  update(dt) {
 
-		// after GLOBAL collision & contact
-    
-  	this.vel.add (this.force.clone().multiplyScalar(dt))
-    this.pos.add (this.vel.clone().multiplyScalar(dt))
 
- 		this.obj.position.copy (this.pos);
-		this.center.copy (this.pos);
-		//console.log(this.center);
-  }
 
-	// useless API
-  moveTo(x,y) {
-	
-	this.center.x = x;
-    this.center.y = y;
-	this.obj.position.copy (this.center)  
-  	this.pos.set (x,y,0)
-  }
-}
-
-class Rect {
-	constructor (center, sizes,name,number,resCoeff) {
-	this.type = 'rect';
-	this.normal = new THREE.Vector3(0,1,0)
-	this.pc = new THREE.Vector3(0,1,0)
-	this.obj = new THREE.Object3D();
-  	this.center = center;
-    this.axes = [new THREE.Vector3(1,0,0), new THREE.Vector3(0,1,0)]
-    this.sizes = sizes;
-	this.name = name||'origin'
-	this.number = number||"0";
-	this.resCoeff = resCoeff||0.9
-/* 
- 		this.max = center.clone().add ( this.axes[0].clone().multiplyScalar(sizes[0]/2) )
-              .add( this.axes[1].clone().multiplyScalar(sizes[1]/2) );
-    this.min = center.clone().add (center.clone().sub(this.max));     
-*/    
-
-	let loader = new THREE.TextureLoader()
-	loader.crossOrigin = '';
-	
-	var texture = loader.load('https://i.imgur.com/qfXqQSD.jpg');
-	texture.repeat.set(sizes[0]/15, 1);
-	texture.wrapS = THREE.RepeatWrapping;
-	texture.wrapT = THREE.RepeatWrapping;
-	
-	THREE.ImageUtils.crossOrigin = '';
-    this.mesh = new THREE.Mesh (new THREE.PlaneGeometry (sizes[0],sizes[1]), new THREE.MeshBasicMaterial({
-	side: THREE.DoubleSide,
-    transparent: true, // key to cutout texture
-    map: texture
-	}))
-    //this.mesh.position.copy (center);
-	this.mesh.name = this.name;
-	this.mesh.number = this.number
-	this.obj.name = this.name;
-	this.obj.add (this.mesh);
-    scene.add (this.obj)
-  }
-  
-  moveTo (x,y) {
-	
-	this.pc.set (x, y, 0);
-    //this.mesh.position.copy (this.pc);
-	this.obj.position.copy (this.pc);
-	this.center.copy (this.pc);
-	//console.log(this.center);
-  }
-  rotateTo (theta) {  // about +Z
-  
-  	let euler = new THREE.Euler(0,0,theta)
-	
-  	this.axes[0].copy (new THREE.Vector3(1,0,0).applyEuler (euler))
-  	this.axes[1].copy (new THREE.Vector3(0,1,0).applyEuler (euler))
-		//this.mesh.rotation.z = theta;
-		this.obj.rotation.z = theta;
-		this.normal.applyEuler (new THREE.Euler (0,0,theta))
-
-		
-  }
-  
-}
-
-class ggrect {
-	constructor (center, sizes,name,number,resCoeff) {
-	this.type = 'finish';
-	this.normal = new THREE.Vector3(0,1,0)
-	this.pc = new THREE.Vector3(0,1,0)
-	this.obj = new THREE.Object3D();
-  	this.center = center;
-    this.axes = [new THREE.Vector3(1,0,0), new THREE.Vector3(0,1,0)]
-    this.sizes = sizes;
-	this.name = name||'origin'
-	this.number = number||"0";
-	this.resCoeff = resCoeff||0.9
-/* 
- 		this.max = center.clone().add ( this.axes[0].clone().multiplyScalar(sizes[0]/2) )
-              .add( this.axes[1].clone().multiplyScalar(sizes[1]/2) );
-    this.min = center.clone().add (center.clone().sub(this.max));     
-*/    
-	THREE.ImageUtils.crossOrigin = '';
-    this.mesh = new THREE.Mesh (new THREE.PlaneGeometry (sizes[0],sizes[1]), new THREE.MeshBasicMaterial({
-	side: THREE.DoubleSide,
-    transparent: true, // key to cutout texture
-    //map: THREE.ImageUtils.loadTexture('https://e.share.photo.xuite.net/s22040413/1e5f3bd/4122842/156977891_m.jpg')
-	color : 'red'
-	}))
-    //this.mesh.position.copy (center);
-	this.mesh.name = this.name;
-	this.mesh.number = this.number
-	this.obj.name = this.name;
-	this.obj.add (this.mesh);
-    scene.add (this.obj)
-  }
-  
-  moveTo (x,y) {
-	
-	this.pc.set (x, y, 0);
-    //this.mesh.position.copy (this.pc);
-	this.obj.position.copy (this.pc);
-	this.center.copy (this.pc);
-	//console.log(this.center);
-  }
-  rotateTo (theta) {  // about +Z
-  
-  	let euler = new THREE.Euler(0,0,theta)
-	
-  	this.axes[0].copy (new THREE.Vector3(1,0,0).applyEuler (euler))
-  	this.axes[1].copy (new THREE.Vector3(0,1,0).applyEuler (euler))
-		//this.mesh.rotation.z = theta;
-		this.obj.rotation.z = theta;
-		this.normal.applyEuler (new THREE.Euler (0,0,theta))
-  }
-  
+var intervalId;
+var count = 120;
+var score = 0;
+var score1 = 0;
+var ss=0;
+//document.getElementById('score1').textContent = `${score}`;  
+function updateCounter() {
+  var counter = count;
+  document.getElementById('counter').textContent = `${count}`;  
+  if(count >0) {
+      count--;
+  }  
+  if(count<0){
+      ss=1;
+	  thisfinish();
+  }`${score}`
 }
 
 
+///////////////////////////////////////
 function checkIntersect (rect, ball) {
   // move coordinate origin to circle.center
 	let point = rect.center.clone().sub(ball.center)
@@ -235,20 +125,66 @@ function numtest(num1,num2) {
 	return arr[ran]; 
 }
 
-function smallRE() {
-   ball0.moveTo (-15,50)
-   ball0.vel = new THREE.Vector3();
+function smallRE(num) {
+	
+	for(let i=0;i<=0;i++){
+		balls[i].delet()
+	}
+	for(let x = 0; x < objects.length ; x++){
+		if(objects[x].type === 'ball'){
+			objects[x] = [];
+		}
+	}
+	
+	balls = [];
+	if(num == 0){
+	level0ballmake()
+	}
+	if(num==1){
+	level1ballmake();
+	}
+	if(num==2){
+	level0ballmake();
+	}
+	if(num==3){
+	level0ballmake();
+	}
+	
+	 
 }
 
-function bigRE() {
-	ccrect.moveTo (-135,20)
-	ccrect.rotateTo(0)
+function bigRE(num) {
+	while(scene.children.length > 0){ 
+    scene.remove(scene.children[0]); 
+}
+
+	balls = [];
+	objects = [];
+	rect = [];
+	cube = [];
+	pickables = [];
 	for(var g = 0 ; g<angle.length;g++){
 	angle[g] = 0;
 	}
+	if(num==0){
+	level0make();
+	level0ballmake();
+	}
+	if(num==1){
+	level1make();
+	level1ballmake();
+	}
+	if(num==2){
+
+	}
+	if(num==3){
+
+	}
+	makecilck();
 }
 
 function collision () {
+
 
 	for (let i = 0; i < objects.length; i++) {
 		for (let j = i+1; j < objects.length; j++) {
@@ -257,6 +193,7 @@ function collision () {
 	}
 
 }
+
 function intersect (obj1, obj2) {
 	let hit;
 	
@@ -278,6 +215,11 @@ function intersect (obj1, obj2) {
 		if((hit = checkIntersect(obj2, obj1))>=0){
 			console.log(hit)
 			//ballrectIntersect (obj2, obj1,hit)
+			setTimeout(function(){ clearInterval(intervalId);}, 10);
+			score=count*100+100;
+			ss=1;
+			//console.log(score);
+			//
 			start = !start;
 			obj1.moveTo(100,0)
 			thisfinish();
@@ -288,9 +230,14 @@ function intersect (obj1, obj2) {
 		if((hit = checkIntersect(obj1, obj2))>=0){
 			console.log(hit)
 				//ballrectIntersect (obj1, obj2,hit)
+			setTimeout(function(){ clearInterval(intervalId);}, 10);
+			score=count*100+100;
+			ss=1;
+			//console.log(score);
+			//
 			start = !start;
 					obj2.moveTo(100,0)
-			
+			thisfinish();
 			}
 	}
 	
@@ -553,7 +500,6 @@ function ballrectIntersect (rect, ball, hit) {
 		}
 	}
 
-
 function ballBallIntersect (b1, b2) {
 	let centerDist = b1.pos.distanceTo (b2.pos)
   if (centerDist < b1.rad + b2.rad) {
@@ -576,39 +522,127 @@ function ballBallIntersect (b1, b2) {
   }
 }
 
-function thisfinish(){
-	var bigcube = new THREE.Object3D();
+var bigcube = new THREE.Object3D();
 
+function thisfinish(){
+
+	//var bigcube = new THREE.Object3D();
+	
+	let loader = new THREE.TextureLoader()
+	loader.crossOrigin = '';
+	
 	var finishcube =  new THREE.Mesh(new THREE.PlaneGeometry(450, 300), new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0
+     }));
+	finishcube.number = 0;//過關換圖
+	////
+	if(ss===1){    
+		document.getElementById('score1').textContent = `${score}`; 
+	}
+	if(ss===0) {
+      	document.getElementById('score1').textContent = "0"; 
+	}
+	////
+	
+	var finishplane =  new THREE.Mesh(new THREE.PlaneGeometry(200, 150), new THREE.MeshBasicMaterial({
     transparent: true,
     opacity: 0.5,
     visible: true
   }));
+	finishplane.number = 0;
 
 	var click1 = new THREE.Mesh(new THREE.CircleGeometry(13,32),new THREE.MeshBasicMaterial({
 	transparent: true,
-	map: loader.load("https://i.imgur.com/pFhpgoP.png")
+	map: loader.load("strts/restart.png")
 	}));
-	click1.number = -2;
+	click1.number = -4 ;
 	click1.position.set(-40,-60,0);
 
 	var click2 = new THREE.Mesh(new THREE.CircleGeometry(13,32),new THREE.MeshBasicMaterial({
 	transparent: true,
-	map: loader.load("https://i.imgur.com/x0Vfc8K.png")
+	map: loader.load("strts/start.png")
 	}));
-	click2.number = -3;
+	click2.number = -5;
 	click2.position.set(40,-60,0);
   
-  
-	
-	bigcube.add(finishcube);
 	bigcube.add(click1);
 	bigcube.add(click2);
+	bigcube.add(finishplane);
+	bigcube.add(finishcube);
 	
+	pickables.push(bigcube)
+	/*pickables.push(click2)
+	pickables.push(finishplane)
+	pickables.push(finishcube)
+	*/
 	bigcube.position.z = 100
 	scene.add(bigcube);
 }
 
+function refinish(num){
+	while(scene.children.length > 0){ 
+    scene.remove(scene.children[0]); 
+}
+
+	balls = [];
+	objects = [];
+	rect = [];
+	cube = [];
+	pickables = [];
+	bigcube = new THREE.Object3D();
+	//console.log(bigcube)
+	for(var g = 0 ; g<angle.length;g++){
+	angle[g] = 0;
+	}
+	if(num==0){
+	level0make();
+	level0ballmake()
+	}
+	if(num==1){
+	level1make();
+	level1ballmake();
+	}
+	if(num==2){
+	level0make();
+	level0ballmake();
+	}
+	if(num==3){
+	level0make();
+	level0ballmake();
+	}
+	
+	makecilck()
+}
+
+function buildlevel(num){
+	while(scene.children.length > 0){ 
+    scene.remove(scene.children[0]); 
+}
+
+	balls = [];
+	objects = [];
+	rect = [];
+	cube = [];
+	pickables = [];
+	bigcube = new THREE.Object3D();
+	if(num == 0){
+	
+	}
+	if(num == 1){
+	
+	level1make();
+	level1ballmake();
+		
+	}
+	if(num == 2){
+	
+	}
+	
+	if(num == 3){
+	}
+	makecilck()
+}
 
 var start = false;
 var addf = false;
@@ -626,20 +660,27 @@ var pickables = [];
 var cube = [];
 var movetest;
 var keyboard = new KeyboardState();
-var ball0,ccrect,texture;
+var texture;
+var levelnum = 0;
+var level0 = new THREE.Object3D();
+
+
 init();
 animate();
 
+
 function init() {
-  renderer = new THREE.WebGLRenderer({ alpha: true });//alpha: true 透明背景
+
+
+  renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x888888,0);
+  renderer.setClearColor(0x888888);
+  
   document.body.appendChild(renderer.domElement);
   
   whRatio = window.innerWidth/window.innerHeight
 	halfH = 140;
   halfW = halfH*whRatio
-	
   // STATS
 	/*stats = new Stats();
 	stats.domElement.style.position = 'absolute';
@@ -647,7 +688,12 @@ function init() {
 	stats.domElement.style.zIndex = 100;
 	document.body.appendChild( stats.domElement );	
   */
+  
+
+  let loader = new THREE.TextureLoader()
+	loader.crossOrigin = '';
    scene = new THREE.Scene();
+   scene.background = loader.load("https://i.imgur.com/PaWt7bj.jpg")
      camera = new THREE.OrthographicCamera(-halfW, halfW, halfH, -halfH, -10, 100);
    camera.position.z = 100;
 
@@ -657,134 +703,187 @@ function init() {
     
 	window.addEventListener('resize', onWindowResize, false);
 
-	
-///////////////////////////////////////////////////////////////////////	
-	
-	
-	
-	
-	var rect = new Rect(new THREE.Vector3(15,22,0), [45,10]);
-   //rect.rotateTo (-5.2)
-    rect.moveTo (55,-10)
-	
-	var rect1 = new Rect(new THREE.Vector3(15,22,0), [15,10]);
-	rect1.moveTo (-20, 42)
-	rect1.rotateTo (-Math.PI/4)
-	var rect2 = new Rect(new THREE.Vector3(15,22,0), [75,10]);
-	rect2.moveTo (-50, -10)
-	//rect2.rotateTo (Math.PI/2)
-	/*
-	var rect3 = new Rect(new THREE.Vector3(15,22,0), [30,10]);
-	rect3.moveTo (25, 0)
-	rect3.rotateTo (Math.PI/2)
-	var rect4 = new Rect(new THREE.Vector3(15,22,0), [40,10]);
-	rect4.moveTo (-20, -10)
-	//rect4.rotateTo (Math.PI/2)
-	*/
-    ball0 = new Ball(new THREE.Vector3(),4);
-    ball0.moveTo (-15,50)
- 	/*let ball1 = new Ball(new THREE.Vector3(),3,5);
- 	ball1.moveTo (-9,60)
-	*/
-	objects = [rect,ball0,rect1,rect2]
-	cube = [];
-    balls = [ball0]
-	console.log(rect)
-	//rect.rotateTo(Math.PI/2)
+////////////////////////////////////////////////////
+	level0make();
+	makecilck();
+	level0ballmake()
 ////////////////////////////////////////////////////////////
-	ccrect = new Rect(new THREE.Vector3(15,22,0), [15,10],"myccrect","1");
-	ccrect.moveTo (-135,20)
-	objects.push(ccrect)
-	cube.push(ccrect)
-		
-  
-	/*var ccrect2 = new Rect(new THREE.Vector3(15,22,0), [20,10],"myccrect","2");
-	ccrect2.moveTo (-135,50)
-	objects.push(ccrect2)
-	cube.push(ccrect2)*/
-	
-  
-  
-	var finishss = new ggrect(new THREE.Vector3(15,22,0), [10,7.5]);
-	finishss.moveTo (60,-1.5)
-	//finishss.mesh.material.color = (0xffffff)
-	objects.push(finishss)
-	
-	console.log(finishss)
-	
-	
-  let brickf = new THREE.Mesh (new THREE.BoxGeometry(15,10,0), new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true }));
-  brickf.name = "mybrickf";
-  brickf.position.set (10,-10,10);
-  scene.add(brickf);
-  
-	
- 
 	
 ////////////////////////////////////////////////////////////
-  var plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshBasicMaterial({
-    transparent: true,
-    opacity: 0.5,
-    visible: true
-  }));
-  //scene.add(plane);
-  plane.name = 'myplane'
-  pickables = [finishss.obj,ccrect.obj,rect.obj,rect1.obj,rect2.obj];
-  pickables.push(plane);
-  //console.log(pickables)
 
 	raycaster = new THREE.Raycaster();
 
-	for(let y = 0 ; y < cube.length;y++){
-		angle[y] = Math.PI/6;
-	}
-	/*console.log(angle);
-	console.log(cube);
-	
-	*/
+
 	document.addEventListener('mousemove', onDocumentMouseMove, false);
 	document.addEventListener('mousedown', onDocumentMouseDown, false);
 	document.addEventListener( 'keydown', onDocumentKeyDown, false );
 	document.addEventListener( 'keyup', onDocumentKeyUp, false );
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    loader = new THREE.TextureLoader()
-	loader.crossOrigin = '';
-	
-	texture = loader.load('https://i.imgur.com/x0Vfc8K.png');
-	
- cilck1 = new THREE.Mesh(new THREE.CircleGeometry(13,32),new THREE.MeshBasicMaterial({
-	transparent: true,
-	map: texture,
-	needsUpdate : true
-}));
-cilck1.number = -1;
-scene.add(cilck1);
-pickables.push(cilck1);
-cilck1.position.set(120,-90,0);
-
-var cilck2 = new THREE.Mesh(new THREE.CircleGeometry(13,32),new THREE.MeshBasicMaterial({
-	transparent: true,
-	map: loader.load("https://i.imgur.com/pFhpgoP.png")
-}));
-cilck2.number = -2;
-scene.add(cilck2);
-pickables.push(cilck2);
-cilck2.position.set(155,-90,0);
-
-var cilck3 = new THREE.Mesh(new THREE.CircleGeometry(13,32),new THREE.MeshBasicMaterial({
-	transparent: true,
-	map: loader.load("https://i.imgur.com/9iqDfxD.png")
-}));
-cilck3.number = -3;
-scene.add(cilck3);
-pickables.push(cilck3);
-cilck3.position.set(190,-90,0);
-
- console.log(cilck1)
+    
 
 }
 
+
+function makecilck() {
+	let loader = new THREE.TextureLoader()
+	loader.crossOrigin = '';
+	
+	texture = loader.load('strts/start.png');
+	
+	cilck1 = new THREE.Mesh(new THREE.CircleGeometry(13,32),new THREE.MeshBasicMaterial({
+		transparent: true,
+		map: texture,
+		needsUpdate : true
+	}));
+	cilck1.number = -1;
+	scene.add(cilck1);
+	pickables.push(cilck1);
+	cilck1.position.set(120,-90,0);
+
+	var cilck2 = new THREE.Mesh(new THREE.CircleGeometry(13,32),new THREE.MeshBasicMaterial({
+		transparent: true,
+		map: loader.load("strts/restart.png")
+	}));
+	cilck2.number = -2;
+	scene.add(cilck2);
+	pickables.push(cilck2);
+	cilck2.position.set(155,-90,0);
+
+	var cilck3 = new THREE.Mesh(new THREE.CircleGeometry(13,32),new THREE.MeshBasicMaterial({
+		transparent: true,
+		map: loader.load("strts/stop.png")
+	}));
+	cilck3.number = -3;
+	scene.add(cilck3);
+	pickables.push(cilck3);
+	cilck3.position.set(190,-90,0);
+	console.log(cilck1)
+}
+
+function level0make(){
+	var rect = new Rect(new THREE.Vector3(15,22,0), [45,10]);
+    rect.moveTo (55,-10)
+	var rect1 = new Rect(new THREE.Vector3(15,22,0), [15,10]);
+	rect1.moveTo (-20, 42)
+	rect1.rotateTo (-Math.PI/4)
+	var rect2 = new Rect(new THREE.Vector3(15,22,0), [75,10]);
+	rect2.moveTo (-50, -10)
+	
+	objects = [rect,rect1,rect2]
+	
+	var ccrect = new Rect(new THREE.Vector3(15,22,0), [15,10],"myccrect","1");
+	ccrect.moveTo (-135,20)
+	objects.push(ccrect)
+	cube.push(ccrect)
+	
+	var finishss = new ggrect(new THREE.Vector3(15,22,0), [10,7.5]);
+	finishss.moveTo (60,-1.5)
+	objects.push(finishss)
+	
+	pickables = [finishss.obj,ccrect.obj,rect.obj,rect1.obj,rect2.obj];
+	
+	let brickf = new THREE.Mesh (new THREE.BoxGeometry(15,10,0), new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.3, transparent: true }));
+	brickf.name = "mybrickf";
+	brickf.position.set (10,-10,10);
+	scene.add(brickf);
+	
+	for(let y = 0 ; y < cube.length;y++){
+		angle[y] = Math.PI/6;
+	}
+    ///////////
+	count = 120;
+    score = 0;
+	ss = 0;
+	setTimeout(function(){ clearInterval(intervalId);}, 121500);//過120秒後停止
+	intervalId = setInterval(updateCounter, 1000);
+if(ss===1){    
+		document.getElementById('score1').textContent = `${score}`; 
+	}
+	if(ss===0) {
+      	document.getElementById('score1').textContent = "0"; 
+	}
+	////////
+}
+
+function level0ballmake(){
+
+	var ball0 = new Ball(new THREE.Vector3(),5);
+    ball0.moveTo (-15,51)
+	
+	balls = [ball0];
+	console.log(balls)
+	
+	objects.push(ball0)
+
+}
+
+function level1make(){
+	var rect = new Rect(new THREE.Vector3(15,22,0), [75,10]);
+    rect.moveTo (63,-22)
+	rect.rotateTo (Math.PI/2)
+	var rect1 = new Rect(new THREE.Vector3(15,22,0), [15,10]);
+	rect1.moveTo (-11, 41.5)
+	rect1.rotateTo (Math.PI/4)
+	var rect2 = new Rect(new THREE.Vector3(15,22,0), [150,10]);
+	rect2.moveTo (-7, -64.5)
+	var rect3 = new Rect(new THREE.Vector3(15,22,0), [75,10]);
+	rect3.moveTo (-77, -22)
+	rect3.rotateTo (Math.PI/2)
+	var rect4 = new Rect(new THREE.Vector3(15,22,0), [45,10]);
+	rect4.moveTo (-7, -37)
+	rect4.rotateTo (Math.PI/2)
+	var rect5 = new Rect(new THREE.Vector3(15,22,0), [75,10]);
+	rect5.moveTo (30.5, 20)
+	
+	objects = [rect,rect1,rect2,rect3,rect4,rect5]
+	
+	var ccrect = new Rect(new THREE.Vector3(15,22,0), [15,10],"myccrect","1");
+	ccrect.moveTo (-135,20)
+	objects.push(ccrect)
+	cube.push(ccrect)
+	
+	var ccrect2 = new Rect(new THREE.Vector3(15,22,0), [15,10],"myccrect","2","1.2");
+	ccrect2.mesh.material.map = THREE.ImageUtils.loadTexture("https://i.imgur.com/AvD3b7X.jpg");
+	ccrect2.moveTo (-135,50)
+	objects.push(ccrect2)
+	cube.push(ccrect2)
+	
+	var finishss = new ggrect(new THREE.Vector3(15,22,0), [10,7.5]);
+	finishss.moveTo (40,-56)
+	objects.push(finishss)
+	
+	pickables = [finishss.obj,ccrect.obj,ccrect2.obj,rect.obj,rect1.obj,rect2.obj,rect3.obj,rect4.obj,rect5.obj];
+	
+	for(let y = 0 ; y < cube.length;y++){
+		angle[y] = Math.PI/6;
+	}
+    ////////////
+	count = 120;
+	score = 0;
+	ss = 0;
+	setTimeout(function(){ clearInterval(intervalId);}, 121500);//過120秒後停止
+	intervalId = setInterval(updateCounter, 1000);
+	if(ss===1){    
+		document.getElementById('score1').textContent = `${score}`; 
+	}
+	if(ss===0) {
+      	document.getElementById('score1').textContent = "0"; 
+	}
+	///////////////
+}
+
+function level1ballmake(){
+
+	var ball0 = new Ball(new THREE.Vector3(),5);
+    ball0.moveTo (-15,52)
+	
+	balls = [ball0];
+	console.log(balls)
+	
+	objects.push(ball0)
+
+}
 
 function onWindowResize() {
   whRatio = window.innerWidth/window.innerHeight;
@@ -843,19 +942,34 @@ function onDocumentMouseDown(event) {
 			start = !start;
 			if(start){
 			addf = false
-			cilck1.material.map = THREE.ImageUtils.loadTexture("https://i.imgur.com/AfCwETS.png");
+			cilck1.material.map = THREE.ImageUtils.loadTexture("strts/pause.png");
 			}
 			else {
-			cilck1.material.map = THREE.ImageUtils.loadTexture("https://i.imgur.com/x0Vfc8K.png");
+			cilck1.material.map = THREE.ImageUtils.loadTexture("strts/start.png");
 			}
 			
 		}
 		else if(intersects[0].object.number === -2){
-			smallRE();
+			smallRE(levelnum);
+			start = false
+			cilck1.material.map = THREE.ImageUtils.loadTexture("strts/start.png");
 		}
 		else if(intersects[0].object.number === -3){
-			smallRE();
-			bigRE();
+			bigRE(levelnum);
+			start = false
+			cilck1.material.map = THREE.ImageUtils.loadTexture("strts/start.png");
+		}
+		else if(intersects[0].object.number === -4){
+			//scene.remove(bigcube)
+			//console.log(pickables)
+			refinish(levelnum)
+			/*scene.remove.apply(scene, scene.children);
+			init();*/
+		}
+		else if(intersects[0].object.number === -5){
+			levelnum++;
+			buildlevel(levelnum);
+			
 		}
 		else{
 			let picked = intersects[0].object.number;
@@ -924,7 +1038,10 @@ if(start == true){
   for (let i = 0; i < balls.length; i++)
   	balls[i].update(0.1)
 }
+///////////////
+    
 
+////////////////////////
 collision();
   //stats.update();
   requestAnimationFrame(animate);

@@ -1,0 +1,34 @@
+<html>
+<head>
+<style>
+<meta charset="utf-8">
+ <meta name="viewport" content="width=device-width">
+ <title>JS Bin</title>
+
+</style>
+</head>
+
+<body> 
+
+<div id="counter">120</div>
+  <button type="button" id="counterBtn">時間</button>
+<script>
+
+var startTime = 0;
+var intervalId;
+var count=120;
+
+function updateCounter() {
+  var currentTime = Date.now();
+  var counter = ( currentTime - startTime )/1000;
+  var second = ("120" - Math.floor(counter % 121));
+  document.getElementById('counter').textContent = `${second}`;
+  count--;
+}
+    setTimeout(function(){ clearInterval(intervalId); }, 4000);
+    startTime = Date.now();
+    intervalId = setInterval(updateCounter, 10);
+
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<html>
+<head>
+<style>
+<meta charset="utf-8">
+ <meta name="viewport" content="width=device-width">
+ <title>JS Bin</title>
+
+</style>
+</head>
+
+<body> 
+
+<div id=b1 style=" text-align:center; background:gray; width:50vw; height:50vh; color: #0099cc; font-family: impact"> homework1
+  <br> <br>
+  <button id='bpp1' style="position:absolute "> Finally count down </button>
+  <br>
+  <p id='show'> </p>
+  <input type="text" id="input1" style='width:10%' value="20">
+</div>
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+
+$('#bpp1').click(
+  function() {
+     count = $("#input1").val();
+		 setTimeout (countDown, 1000);   
+  }
+);
+
+function countDown() {
+   if (count > 0) {
+   	--count;
+    $("#show").text (count);
+		setTimeout (countDown, 1000);   
+   }
+   else{
+    alert ('time out');
+    setTimeout (blinblin, 500);
+    }
+}
+
+function blinblin() {
+   if (count % 3 == 0) {
+    $('#b1').css('background', 'blue');
+    $('#b1').css('color', 'black');
+  } else if (count % 3 == 1) {
+    $('#b1').css('background', 'yellow');
+    $('#b1').css('color', 'green');
+  }else if (count % 3 == 2) {
+    $('#b1').css('background', 'gray');
+    $('#b1').css('color', '#0099cc');
+  }
+  count++;
+  setTimeout(blinblin, 500);
+}
+
+
+</script>
+</body>
+</html>
