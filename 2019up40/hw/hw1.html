@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <style>
+  #info {
+	    position: absolute;
+	    top: 0px;
+	    width: 100%;
+	    padding: 0px;
+	    text-align: center;
+	    color: #ffff00;
+}
+
+body {
+	    background-color: #fff;
+	    color: #111;
+	    margin: 0px;
+	    overflow: hidden;
+	    font-family: Monospace;
+	    font-size: 20px;
+	    position: absolute;
+}
+
+</style> 
+</head>
+<body>
+
+<div id="info">LampTree</div>
+
+<div id='0'style=' width:1%; top: 80px; position: absolute; left:945px;' >l0</div>
+<div id='1'style=' width:1%; top: 200px; position: absolute; left:910px;' >l1</div>
+<div id='2'style=' width:1%; top: 200px; position: absolute; left:980px;' >l2</div>
+<div id='3'style=' width:1%; top: 280px; position: absolute; left:890px;' >l3</div>
+<div id='4'style=' width:1%; top: 280px; position: absolute; left:945px;' >l4</div>
+<div id='5'style=' width:1%; top: 280px; position: absolute; left:1000px;' >l5</div>
+<div id='6'style=' width:1%; top: 370px; position: absolute; left:870px;' >l6</div>
+<div id='7'style=' width:1%; top: 370px; position: absolute; left:920px;' >l7</div>
+<div id='8'style=' width:1%; top: 370px; position: absolute; left:970px;' >l8</div>
+<div id='9'style=' width:1%; top: 370px; position: absolute; left:1020px;' >l9</div>
+
+<button id="start" style="width:5%;top: 0px; position: absolute; left:500px;">Start</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r83/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+  
+var scene, renderer, camera, controls;
+var tree, tree2;
+var start = false;
+
+init();
+animate();
+
+$("#start").click(function() {
+  start = !start;
+  if(start){
+  $('#start').text ('stop')
+  }
+  else{
+  $('#start').text ('Start')
+  }
+});
+
+function init() {
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
+    renderer.setSize(width, height);
+    renderer.setClearColor(0x888888);
+    document.body.appendChild(renderer.domElement);
+
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+    camera.position.y = 160;
+    camera.position.z = 400;
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    var gridXZ = new THREE.GridHelper(100, 10, 'red', 'white');
+    scene.add(gridXZ);
+
+    var pointLight = new THREE.PointLight(0xffffff);
+    pointLight.position.set(0, 300, 200);
+    scene.add(pointLight);
+
+    var ambientLight = new THREE.AmbientLight(0x111111);
+    scene.add(ambientLight);
+
+    //////////////////////////////////////////////////////////////////////////////
+    THREE.ImageUtils.crossOrigin = '';
+    material = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/TjXqjee.png')
+    });
+
+    tree = new THREE.Mesh (new THREE.PlaneGeometry (100,150), material);
+    scene.add(tree);
+
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();    
+    /////////////////////////////////////////////////////////////////////////////
+    tree.position.set (0,68.5,0);
+    rotatetree (tree);
+    /////////////////////////////////////////////////////////////////////////////    
+    render();
+}
+
+function render() {
+    renderer.render(scene, camera);
+}
+
+function rotatetree (mesh)
+{
+    var b = mesh.position.clone();  // billboard location
+    var rotaxis = new THREE.Vector3();
+    var v, yhat, n;
+    
+    v = camera.position.clone(); // clone the camera position
+    yhat = new THREE.Vector3(0, 1, 0); // up
+    n = new THREE.Vector3(0, 0, 1); // billboard normal
+
+    v.subVectors(v, b); // v-b
+    v.sub(yhat.clone().multiplyScalar(v.dot(yhat)));
+    v.normalize(); // pxz
+
+    rotangle = Math.acos(v.dot(n));
+    rotaxis.crossVectors(n, v);
+    if (rotaxis.dot(yhat) < 0) rotangle *= -1;
+
+    mesh.rotation.y = rotangle;
+}
+
+
+function Lamp(lampId) {
+  var name = '#'+ lampId;
+  var status = 0;
+  var turn = false;
+  var toggle = function() {
+    if (status == 0) {
+    	$(name).css ('backgroundColor', 'rgb(143,143,143)');
+      $(name).text (name + ' ');
+    }    
+    else if (status == 1) {
+    	$(name).css ('backgroundColor', 'yellow');
+      $(name).text (name + ' ');
+    } 
+    else if (status == 2){
+    	$(name).css ('backgroundColor', 'red');
+      $(name).text (name + ' ');
+      status = 0;
+   }
+   if (start==true) status ++;
+   if (start==false){
+     status = 0;   
+   } 
+  };
+
+  this.check = function() {
+    return status;
+  }
+  
+  this.toggleBlink = function() {
+  	setInterval (function() {toggle();}, 500);
+  }
+}
+
+l0 = new Lamp('0');
+l0.toggleBlink();
+
+l1 = new Lamp('1');
+l1.toggleBlink();
+
+l2 = new Lamp('2');
+l2.toggleBlink();
+
+l3 = new Lamp('3');
+l3.toggleBlink();
+
+l4 = new Lamp('4');
+l4.toggleBlink();
+
+l5 = new Lamp('5');
+l5.toggleBlink();
+
+l6 = new Lamp('6');
+l6.toggleBlink();
+
+l7 = new Lamp('7');
+l7.toggleBlink();
+
+l8 = new Lamp('8');
+l8.toggleBlink();
+
+l9 = new Lamp('9');
+l9.toggleBlink();
+
+</script>
+</body>
+</html>
