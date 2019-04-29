@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <style>
+  #info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00;
+}
+
+body {
+  overflow: hidden;
+}
+
+</style> 
+</head>
+<body>
+
+<div id="info">Hw3 Art Gallery Design dog
+<br>
+<button id = "toggle">
+toggle
+</button>
+
+<button id = "toggle1">
+toggle1
+</button>
+
+<button id = "toggle2">
+toggle2
+</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+var camera, scene, renderer;
+var mesh,meshr,meshh,meshb,meshl,meshr1,meshl1;
+var angle = 0;
+var lamp,lampr,lamph,lampb,lampl,lampr1,lampl1;
+var spotLight,spotLightr,spotLighth,spotLightl,spotLightb,spotLightr1,spotLightl1;
+var v1,v2,v3;
+
+var cameraObj,cameraObj1,cameraObj2;
+var safety = false;
+var safety1 = false;
+var safety2 = false;
+var angle1 = 0;
+var sign = 1;
+
+init();
+animate();
+
+$("#toggle").click(function() {
+	safety = !safety;
+});
+
+$("#toggle1").click(function() {
+	safety1 = !safety1;
+});
+
+$("#toggle2").click(function() {
+	safety2 = !safety2;
+});
+
+function init() {
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.z = 750;
+  camera.position.y = 750;
+  
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+
+  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  document.body.appendChild(renderer.domElement);
+  //axis = new THREE.AxisHelper(20);
+  //scene.add(axis);
+//////////////////////////////////
+  ceiling = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshBasicMaterial({
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.2
+  }));
+  scene.add(ceiling);
+  ceiling.rotation.x = Math.PI / 2;
+  ceiling.position.y = 280;
+  
+  floor = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshPhongMaterial());
+  scene.add(floor);
+  floor.rotation.x = -Math.PI / 2;
+  
+  THREE.ImageUtils.crossOrigin = '';
+    floorlines = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/Tbwg9zv.jpg')
+    });
+
+  var  floor1 = new THREE.Mesh (new THREE.PlaneGeometry (1000,1000), floorlines);
+	floor1.position.set (0,1,0);
+	floor1.rotation.x=Math.PI/2;
+	scene.add(floor1);
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  THREE.ImageUtils.crossOrigin = '';
+    pp = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/AF8OYYR.jpg')
+    });  
+  var  p = new THREE.Mesh (new THREE.PlaneGeometry (150,150), pp);
+	p.position.set (100,150,-497.2);
+	scene.add(p);
+  
+  THREE.ImageUtils.crossOrigin = '';
+    pp1 = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/hlQ6lCq.jpg')
+    });  
+  var  p1 = new THREE.Mesh (new THREE.PlaneGeometry (200,250), pp1);
+	p1.position.set (350,140,-497.2);
+	scene.add(p1);
+  
+  THREE.ImageUtils.crossOrigin = '';
+    pp2 = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/w0pgC7j.jpg')
+    });  
+  var  p2 = new THREE.Mesh (new THREE.PlaneGeometry (400,200), pp2);
+	p2.position.set (-497.2,140,-50);
+	p2.rotation.y=Math.PI/2;
+  scene.add(p2);
+  
+  THREE.ImageUtils.crossOrigin = '';
+    pp3 = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/iGaSOme.jpg')
+    });  
+  var  p3 = new THREE.Mesh (new THREE.PlaneGeometry (400,200), pp3);
+	p3.position.set (497.2,140,95);
+	p3.rotation.y=Math.PI/2;
+  scene.add(p3);
+  
+  THREE.ImageUtils.crossOrigin = '';
+    pp4 = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/CZs5vtn.jpg')
+    });  
+  var  p4 = new THREE.Mesh (new THREE.PlaneGeometry (200,200), pp4);
+	p4.position.set (-350,150,497.2);
+	scene.add(p4);
+  
+  THREE.ImageUtils.crossOrigin = '';
+    pp5 = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/bNULMSw.jpg')
+    });  
+  var  p5 = new THREE.Mesh (new THREE.PlaneGeometry (200,200), pp5);
+	p5.position.set (-497.2,140,350);
+	p5.rotation.y=Math.PI/2;
+  scene.add(p5);
+  
+  THREE.ImageUtils.crossOrigin = '';
+    pp6 = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/qwGnFY2.jpg')
+    });  
+  var  p6 = new THREE.Mesh (new THREE.PlaneGeometry (200,200), pp6);
+	p6.position.set (-170,150,-497.2);
+	scene.add(p6);
+  
+  THREE.ImageUtils.crossOrigin = '';
+    pp7 = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/ZdNggUB.jpg')
+    });  
+  var  p7 = new THREE.Mesh (new THREE.PlaneGeometry (200,200), pp7);
+	p7.position.set (497.2,140,-350);
+	p7.rotation.y=Math.PI/2;
+  scene.add(p7);
+  
+  THREE.ImageUtils.crossOrigin = '';
+    pp8 = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/1uEdzEc.jpg')
+    });  
+  var  p8 = new THREE.Mesh (new THREE.PlaneGeometry (200,200), pp8);
+	p8.position.set (310,150,497.2);
+	scene.add(p8);
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  THREE.ImageUtils.crossOrigin = '';
+    tablelines = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        transparent: true, // key to cutout texture
+        map: THREE.ImageUtils.loadTexture('https://i.imgur.com/LZnwPHv.png')
+    });
+  
+  table1 = new THREE.Mesh (new THREE.PlaneGeometry (100,100), tablelines);
+	table1.position.set (30,52.5,0);
+	table1.rotation.x=Math.PI/2;
+	scene.add(table1);
+	table2 = table1.clone();
+    table2.position.set (30,47.5,0);
+	scene.add (table2);
+	table3 = new THREE.Mesh (new THREE.PlaneGeometry (100,5), tablelines);
+	table3.position.set (30,50,-50);
+	scene.add(table3);
+	table4 = table3.clone();
+    table4.position.set (30,50,50);
+	scene.add (table4);
+	table5 = table3.clone();
+    table5.position.set (-20,50,0);
+	table5.rotation.y=Math.PI/2;
+	scene.add(table5);
+	table6 = table5.clone();
+    table6.position.set (80,50,0);
+	scene.add (table6);
+  
+  var cube1 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshPhongMaterial());
+  cube1.position.set(60, 25, 30);
+  scene.add (cube1)
+  var cube2 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshPhongMaterial());
+  cube2.position.set(0, 25, 30);
+  scene.add (cube2)
+  var cube3 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshPhongMaterial());
+  cube3.position.set(60, 25, -30);
+  scene.add (cube3)
+  var cube4 = new THREE.Mesh(new THREE.BoxGeometry(10, 50, 10), new 	THREE.MeshPhongMaterial());
+  cube4.position.set(0, 25, -30);
+  scene.add (cube4)
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  var chair = new THREE.Mesh(new THREE.BoxGeometry(40, 70, 5),
+   new THREE.MeshPhongMaterial());
+  chair.position.set (30, 35, 100);
+  scene.add(chair);
+  var chair1 = new THREE.Mesh(new THREE.BoxGeometry(40, 35, 40),
+   new THREE.MeshPhongMaterial());
+  chair1.position.set (30, 17.5, 80);
+  scene.add(chair1);
+  
+  var chair2 = new THREE.Mesh(new THREE.BoxGeometry(40, 70, 5),
+   new THREE.MeshPhongMaterial());
+  chair2.position.set (30, 35, -100);
+  scene.add(chair2);
+  var chair3 = new THREE.Mesh(new THREE.BoxGeometry(40, 35, 40),
+   new THREE.MeshPhongMaterial());
+  chair3.position.set (30, 17.5, -80);
+  scene.add(chair3);
+  
+  var chair4 = new THREE.Mesh(new THREE.BoxGeometry(40, 70, 5),
+   new THREE.MeshPhongMaterial());
+  chair4.position.set (140, 35, 0);
+  chair4.rotation.y=Math.PI/2;
+  scene.add(chair4);
+  var chair5 = new THREE.Mesh(new THREE.BoxGeometry(40, 35, 40),
+   new THREE.MeshPhongMaterial());
+  chair5.position.set (120, 17.5, 0);
+  chair5.rotation.y=Math.PI/2;
+  scene.add(chair5);
+  
+  var chair6 = new THREE.Mesh(new THREE.BoxGeometry(40, 70, 5),
+   new THREE.MeshPhongMaterial());
+  chair6.position.set (-80, 35, 0);
+  chair6.rotation.y=Math.PI/2;
+  scene.add(chair6);
+  var chair7 = new THREE.Mesh(new THREE.BoxGeometry(40, 35, 40),
+   new THREE.MeshPhongMaterial());
+  chair7.position.set (-60, 17.5, 0);
+  chair7.rotation.y=Math.PI/2;
+  scene.add(chair7);
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  let wallh = new THREE.Mesh(new THREE.BoxGeometry(1000, 280, 5), new THREE.MeshPhongMaterial());
+  scene.add(wallh);
+  wallh.position.set(0, 140, -500);
+  
+  let wallb = new THREE.Mesh(new THREE.BoxGeometry(1000, 280, 5), new THREE.MeshPhongMaterial());
+  scene.add(wallb);
+  wallb.position.set(0, 140, 500);
+  
+  let wallr = new THREE.Mesh(new THREE.BoxGeometry(5, 280, 1000), new THREE.MeshPhongMaterial());
+  scene.add(wallr);
+  wallr.position.set(500, 140, 0);
+  
+  let walll = new THREE.Mesh(new THREE.BoxGeometry(5, 280, 1000), new THREE.MeshPhongMaterial());
+  scene.add(walll);
+  walll.position.set(-500, 140, 0);
+  
+  var walli = new THREE.Mesh(new THREE.BoxGeometry(225, 280, 5),//前中
+   new THREE.MeshPhongMaterial());
+  walli.position.set (0, 140, -384);
+  walli.rotation.y=Math.PI/2;
+  scene.add(walli);
+  
+  var walli2 = new THREE.Mesh(new THREE.BoxGeometry(225, 280, 5),//前右
+   new THREE.MeshPhongMaterial());
+  walli2.position.set (200, 140, -384);
+  walli2.rotation.y=Math.PI/2;
+  scene.add(walli2);
+  
+  var walli3 = new THREE.Mesh(new THREE.BoxGeometry(5, 280, 230),//右
+   new THREE.MeshPhongMaterial());
+  walli3.position.set (-380, 140, 200);
+  walli3.rotation.y=Math.PI/2;
+  scene.add(walli3);
+  
+  var door = new THREE.Mesh(new THREE.BoxGeometry(15, 280, 100),//右
+   new THREE.MeshPhongMaterial());
+  door.position.set (-400, 140, -500);
+  door.rotation.y=Math.PI/2;
+  scene.add(door);
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+	// axis of lamp is in +Z axis
+  // so that we can use lamp.lookAt to follow mesh
+  //
+	lamp = new THREE.Object3D();//中  
+  //axis = new THREE.AxisHelper(50);
+  //lamp.add(axis);
+  lampbody = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 30), new THREE.MeshNormalMaterial());
+  lamp.add(lampbody);
+  lampbody.position.set(0, 0, 15);
+  lampbody.rotation.x = Math.PI / 2;
+  lamp.position.set(0, 280, 0);  // fix to a point on ceiling
+  scene.add(lamp);
+
+  mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 20), new THREE.MeshNormalMaterial());
+  scene.add(mesh)
+
+  ///////////
+  spotLight = new THREE.SpotLight(0xffffff);
+  scene.add(spotLight);
+  spotLight.position.copy(lamp.position);
+
+  spotLight.angle = 0.8;
+  spotLight.penumbra = 0.4;
+  //spotLight.distance = 200;
+  spotLight.decay = 1;
+  spotLight.target = mesh;
+
+	//spotLightHelper = new THREE.SpotLightHelper(spotLight);
+  //scene.add(spotLightHelper);
+  ////////////////////////////////////////////////////////////////////////////////////////
+  
+  lamph = new THREE.Object3D();//前  
+  //axish = new THREE.AxisHelper(50);
+  //lamph.add(axish);
+  lampbodyh = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 30), new THREE.MeshNormalMaterial());
+  lamph.add(lampbodyh);
+  lampbodyh.position.set(0, 0, 0);
+  lampbodyh.rotation.x = Math.PI / 3;
+  lamph.position.set(100, 280, -15);  // fix to a point on ceiling
+  scene.add(lamph);
+
+  meshh = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 20), new THREE.MeshNormalMaterial());
+  meshh.position.set(100, 0, -500);
+  scene.add(meshh)
+
+  ///////////
+  spotLighth = new THREE.SpotLight(0xffffff);
+  scene.add(spotLighth);
+  spotLighth.position.copy(lamph.position);
+
+  spotLighth.angle = 0.8;
+  spotLighth.penumbra = 0.4;
+  //spotLight.distance = 200;
+  spotLighth.decay = 1;
+  spotLighth.target = meshh;
+
+	//spotLightHelper = new THREE.SpotLightHelper(spotLighth);
+  //scene.add(spotLightHelper);  
+  ////////////////////////////////////////////////////////////////////////////////////////
+  
+  lampr = new THREE.Object3D();  //左小牆
+  //axisr = new THREE.AxisHelper(50);
+  //lampr.add(axisr);
+  lampbodyr = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 30), new THREE.MeshNormalMaterial());
+  lampr.add(lampbodyr);
+  lampbodyr.position.set(0, 0, 0);
+  lampbodyr.rotation.z = -Math.PI / 3;
+  lampr.position.set(-80, 280, -10);  // fix to a point on ceiling
+  lampbodyr.rotation.x = -Math.PI / 5;
+  scene.add(lampr);
+
+  meshr = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 20), new THREE.MeshNormalMaterial());
+  meshr.position.set(-500, 0,30);
+  scene.add(meshr)
+
+  ///////////
+  spotLightr = new THREE.SpotLight(0xffffff);
+  scene.add(spotLightr);
+  spotLightr.position.copy(lampr.position);
+
+  spotLightr.angle = 0.8;
+  spotLightr.penumbra = 0.4;
+  //spotLight.distance = 200;
+  spotLightr.decay = 1;
+  spotLightr.target = meshr;
+
+	//spotLightHelper = new THREE.SpotLightHelper(spotLightr);
+  //scene.add(spotLightHelper);
+  /////////////////////////////////////////////////////////////////////////////////////////
+  
+  lampr1 = new THREE.Object3D();  //左前牆
+  //axisr1 = new THREE.AxisHelper(50);
+  //lampr1.add(axisr1);
+  lampbodyr1 = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 30), new THREE.MeshNormalMaterial());
+  lampr1.add(lampbodyr1);
+  lampbodyr1.position.set(0, 0, 0);
+  lampbodyr1.rotation.z = -Math.PI / 3;
+  lampr1.position.set(-140, 280, -100);  // fix to a point on ceiling
+  lampbodyr1.rotation.y = -Math.PI / 2;
+  scene.add(lampr1);
+
+  meshr1 = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 20), new THREE.MeshNormalMaterial());
+  meshr1.position.set(-150, 0, -500);
+  scene.add(meshr1)
+
+  ///////////
+  spotLightr1 = new THREE.SpotLight(0xffffff);
+  scene.add(spotLightr1);
+  spotLightr1.position.copy(lampr1.position);
+
+  spotLightr1.angle = 0.8;
+  spotLightr1.penumbra = 0.4;
+  //spotLight.distance = 200;
+  spotLightr1.decay = 1;
+  spotLightr1.target = meshr1;
+
+	//spotLightHelper = new THREE.SpotLightHelper(spotLightr1);
+  //scene.add(spotLightHelper);
+////////////////////////////////////////////////////////////////////////////////////
+
+  lampl = new THREE.Object3D();  //右前牆
+  //axisl = new THREE.AxisHelper(50);
+  //lampl.add(axisl);
+  lampbodyl = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 30), new THREE.MeshNormalMaterial());
+  lampl.add(lampbodyl);
+  lampbodyl.position.set(0, 0, 0);
+  lampbodyl.rotation.z = Math.PI / 3;
+  lampl.position.set(100, 280, -100);  // fix to a point on ceiling
+  lampbodyl.rotation.y = Math.PI / 7;
+  scene.add(lampl);
+
+  meshl = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 20), new THREE.MeshNormalMaterial());
+  meshl.position.set(500, 0, -250);
+  scene.add(meshl)
+
+  ///////////
+  spotLightl = new THREE.SpotLight(0xffffff);
+  scene.add(spotLightl);
+  spotLightl.position.copy(lampl.position);
+
+  spotLightl.angle = 0.8;
+  spotLightl.penumbra = 0.4;
+  //spotLight.distance = 200;
+  spotLightl.decay = 1;
+  spotLightl.target = meshl;
+
+	//spotLightHelper = new THREE.SpotLightHelper(spotLightl);
+  //scene.add(spotLightHelper);
+////////////////////////////////////////////////////////////////////////////////////
+
+  lampl1 = new THREE.Object3D();  //右後牆
+  //axisl1 = new THREE.AxisHelper(50);
+  //lampl1.add(axisl1);
+  lampbodyl1 = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 30), new THREE.MeshNormalMaterial());
+  lampl1.add(lampbodyl1);
+  lampbodyl1.position.set(0, 0, 0);
+  lampbodyl1.rotation.z = Math.PI / 3;
+  lampl1.position.set(50, 280, 150);  // fix to a point on ceiling
+  lampbodyl1.rotation.y = -Math.PI / 5;
+  scene.add(lampl1);
+
+  meshl1 = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 20), new THREE.MeshNormalMaterial());
+  meshl1.position.set(470, 0, 470);
+  scene.add(meshl1)
+
+  ///////////
+  spotLightl1 = new THREE.SpotLight(0xffffff);
+  scene.add(spotLightl1);
+  spotLightl1.position.copy(lampl1.position);
+
+  spotLightl1.angle = 0.8;
+  spotLightl1.penumbra = 0.4;
+  //spotLight.distance = 200;
+  spotLightl1.decay = 1;
+  spotLightl1.target = meshl1;
+
+	//spotLightHelper = new THREE.SpotLightHelper(spotLightl1);
+  //scene.add(spotLightHelper);
+  //////////////////////////////////////////////////////////////////////////////////////
+  
+  lampb = new THREE.Object3D();  //左後角
+  //axisb = new THREE.AxisHelper(50);
+  //lampb.add(axisb);
+  lampbodyb = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 30), new THREE.MeshNormalMaterial());
+  lampb.add(lampbodyb);
+  lampbodyb.position.set(0, 0, 0);
+  lampbodyb.rotation.z = -Math.PI / 3;
+  lampb.position.set(-50, 280, 300);  // fix to a point on ceiling
+  lampbodyb.rotation.y = Math.PI / 7;
+  scene.add(lampb);
+
+  meshb = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 20), new THREE.MeshNormalMaterial());
+  meshb.position.set(-450, 0, 450);
+  scene.add(meshb)
+
+  ///////////
+  spotLightb = new THREE.SpotLight(0xffffff);
+  scene.add(spotLightb);
+  spotLightb.position.copy(lampb.position);
+
+  spotLightb.angle = 0.8;
+  spotLightb.penumbra = 0.4;
+  //spotLight.distance = 200;
+  spotLightb.decay = 1;
+  spotLightb.target = meshb;
+
+	//spotLightHelper = new THREE.SpotLightHelper(spotLightl);
+  //scene.add(spotLightHelper);
+////////////////////////////////////////////////////////////////////////////////////監視器
+  sCam = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  
+  cameraObj = new THREE.Object3D();
+  //cameraObj.add (new THREE.AxisHelper (40))
+  cameraBody = new THREE.Mesh (new THREE.BoxGeometry (20,12,5), new THREE.MeshNormalMaterial());
+  lens = new THREE.Mesh (new THREE.CylinderGeometry (5,5,10), new THREE.MeshNormalMaterial());
+  lens.position.z = -5;
+  lens.rotation.x = Math.PI/2;
+  cameraObj.add (cameraBody, lens);
+
+  cameraCase = new THREE.Object3D();
+  cameraCase.add (cameraObj);
+	cameraCase.position.set (-490, 280, -490);
+  scene.add (cameraCase);
+	
+  // manual aiming, from (-50,40,50) to (0,0,0)
+  //cameraCase.rotation.z= Math.PI/6; 
+  cameraCase.rotation.y= 4;
+  cameraCase.rotation.x= -Math.PI/7;
+  cameraCase.rotation.order = 'YXZ'
+  
+  ////////////////////////////////////////////////////////////////////////////////////監視器1
+  sCam1 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  
+  cameraObj1 = new THREE.Object3D();
+  //cameraObj1.add (new THREE.AxisHelper (40))
+  cameraBody1 = new THREE.Mesh (new THREE.BoxGeometry (20,12,5), new THREE.MeshNormalMaterial());
+  lens1 = new THREE.Mesh (new THREE.CylinderGeometry (5,5,10), new THREE.MeshNormalMaterial());
+  lens1.position.z = -5;
+  lens1.rotation.x = Math.PI/2;
+  cameraObj1.add (cameraBody1, lens1);
+
+  cameraCase1 = new THREE.Object3D();
+  cameraCase1.add (cameraObj1);
+	cameraCase1.position.set (490, 280, 490);
+  scene.add (cameraCase1);
+	
+  // manual aiming, from (-50,40,50) to (0,0,0)
+  //cameraCase.rotation.z= Math.PI/6; 
+  cameraCase1.rotation.y= 7;
+  cameraCase1.rotation.x= -Math.PI/7;
+  cameraCase1.rotation.order = 'YXZ'
+  ////////////////////////////////////////////////////////////////////////////////////監視器2
+  sCam2 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  
+  cameraObj2 = new THREE.Object3D();
+  //cameraObj2.add (new THREE.AxisHelper (40))
+  cameraBody2 = new THREE.Mesh (new THREE.BoxGeometry (20,12,5), new THREE.MeshNormalMaterial());
+  lens2 = new THREE.Mesh (new THREE.CylinderGeometry (5,5,10), new THREE.MeshNormalMaterial());
+  lens2.position.z = -5;
+  lens2.rotation.x = Math.PI/2;
+  cameraObj2.add (cameraBody2, lens2);
+
+  cameraCase2 = new THREE.Object3D();
+  cameraCase2.add (cameraObj2);
+	cameraCase2.position.set (100, 280, 480);
+  scene.add (cameraCase2);
+	
+  // manual aiming, from (-50,40,50) to (0,0,0)
+  //cameraCase.rotation.z= Math.PI/6; 
+  cameraCase2.rotation.x= -Math.PI/7;
+  cameraCase2.rotation.order = 'YXZ'
+
+}
+/*右後左前
+cameraCase.rotation.z= -Math.PI/7; 
+  cameraCase.rotation.y= Math.PI/2;
+  */
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+  //angle += 0.01;
+  //mesh.position.set(50 * Math.cos(angle), 0, 50 * Math.sin(angle));
+
+  //lamp.lookAt(mesh.position);
+  //spotLightHelper.update();
+///////監視器角度
+  angle1 += 0.01*sign;
+  if (angle1 > 0.5 || angle1 < -0.5)
+  	sign *= -1;
+  cameraObj.rotation.y = angle1;
+  cameraObj1.rotation.y = angle1;
+  cameraObj2.rotation.y = angle1;
+
+	sCam.matrixWorld.copy (cameraObj.matrixWorld);
+  sCam.matrixAutoUpdate = false;
+  
+  let cam = safety ? sCam : camera;
+  renderer.render(scene, cam);
+  
+  sCam1.matrixWorld.copy (cameraObj1.matrixWorld);
+  sCam1.matrixAutoUpdate = false;
+  
+  let cam1 = safety1 ? sCam1 : camera;
+  if(safety1==true)
+  renderer.render(scene, cam1);
+  
+  sCam2.matrixWorld.copy (cameraObj2.matrixWorld);
+  sCam2.matrixAutoUpdate = false;
+  
+  let cam2 = safety2 ? sCam2 : camera;
+  if(safety2==true)
+  renderer.render(scene, cam2);
+  
+  
+//////////
+
+  requestAnimationFrame(animate);
+  //render();
+}
+
+/*function render() {
+  renderer.render(scene, camera);
+}*/
+
+
+</script>
+</body>
+</html>
