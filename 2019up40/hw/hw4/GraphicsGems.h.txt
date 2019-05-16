@@ -1,0 +1,160 @@
+/ * 
+ * GraphicsGems.h  
+ *版本1.0  -  Andrew Glassner
+ *來自“圖形寶石”，學術出版社，1990年
+ * /
+
+#ifndef GG_H
+
+#define GG_H 1
+
+/ ********************* /
+/ * 2d幾何類型* /
+/ ********************* /
+
+typedef struct Point2Struct {/ * 2d point * /
+	雙x，y;
+	} Point2;
+typedef Point2 Vector2;
+
+typedef struct IntPoint2Struct {/ * 2d整數點* /
+	int x，y;
+	} IntPoint2;
+
+typedef struct Matrix3Struct {/ * 3-by-3矩陣* /
+	雙元素[3] [3];
+	} Matrix3;
+
+typedef struct Box2dStruct {/ * 2d box * /
+	Point2 min，max;
+	} Box2;
+	
+
+/ ********************* /
+/ * 3d幾何類型* /
+/ ********************* /
+
+typedef struct Point3Struct {/ * 3d point * /
+	double x，y，z;
+	} Point3;
+typedef Point3 Vector3;
+
+typedef struct IntPoint3Struct {/ * 3d整數點* /
+	int x，y，z;
+	} IntPoint3;
+
+
+typedef struct Matrix4Struct {/ * 4-by-4矩陣* /
+	雙元素[4] [4];
+} Matrix4;
+
+typedef struct Box3dStruct {/ * 3d box * /
+	Point3 min，max;
+	} Box3;
+
+
+
+/ *********************** /
+/ *單參數宏* /
+/ *********************** /
+
+/ * a *的絕對值
+#define ABS（a）（（（a）<0）？ - （a）:( a））
+
+/ *將a舍入到最近的int * /
+#define ROUND（a）floor（（a）+0.5）
+
+/ *取符號a，-1,0或1 * /
+#define ZSGN（a）（（（a）<0）？ -  1：（a）> 0？1：0）	
+
+/ *取二進制符號a，-1或1，如果> = 0 * /
+#define SGN（a）（（（a）<0）？ -  1：1）
+
+如果某些事情應該是真的不是* /
+#define ASSERT（x）\
+if（！（x））fprintf（stderr，“Assert failed：x \ n”）;
+
+/ * square a * /
+#define SQR（a）（（a）*（a））	
+
+
+/ *********************** /
+/ *雙參數宏* /
+/ *********************** /
+
+/ *找到a和b * /的最小值
+#define MIN（a，b）（（（a）<（b））？（a）:( b））	
+
+/ *找到a和b * /的最大值
+#define MAX（a，b）（（（a）>（b））？（a）:( b））	
+
+/ *交換a和b（見Wyvill的Gem）* /
+#define SWAP（a，b）{a ^ = b; b ^ = A; 一個^ = B; }
+
+/ *線性插值從l（當a = 0時）到h（當a = 1時）* /
+/ *（等於（a * h）+（（1-a）* l）* /
+#define LERP（a，l，h）（（l）+（（（h） - （l））*（a）））
+
+/ *將輸入箝位到指定範圍* /
+#define CLAMP（v，l，h）（（v）<（l）？（l）:( v）>（h）？（h）：v）
+
+
+/ ************ /
+/ *內存分配宏* /
+/ ************ /
+
+/ *創建一個結構的新實例（參見Hultquist的Gem）* /
+#define NEWSTRUCT（x）（struct x *）（malloc（（unsigned）sizeof（struct x）））
+
+/ *創建一個類型的新實例* /
+#define NEWTYPE（x）（x *）（malloc（（unsigned）sizeof（x）））
+
+
+/ ****** /
+/ *有用的常量* /
+/ ****** /
+
+#define PI 3.141592f / *古老的pi * /
+#define PITIMES2 6.283185f / * 2 * pi * /
+#define PIOVER2 1.570796f / * pi / 2 * /
+#define E 2.718282f / *古老的e * /
+#define SQRT2 1.414214f / * sqrt（2）* /
+#define SQRT3 1.732051f / * sqrt（3）* /
+#define GOLDEN 1.618034f / *黃金比例* /
+#define DTOR 0.017453f / *將度數轉換為弧度* /
+#define RTOD 57.29578f / *將弧度轉換為度* /
+
+
+/ ************ /
+/ *布爾* /
+/ ************ /
+
+#define TRUE 1
+#define FALSE 0
+#define ON 1
+#define OFF 0
+typedef int boolean; / *布爾數據類型* /
+typedef boolean flag; / *標誌數據類型* /
+
+extern double V2SquaredLength（），V2Length（）;
+extern double V2Dot（），V2DistanceBetween2Points（）; 
+extern Vector2 * V2Negate（），* V2Normalize（），* V2Scale（），* V2Add（），* V2Sub（）;
+extern Vector2 * V2Lerp（），* V2Combine（），* V2Mul（），* V2MakePerpendicular（）;
+extern Vector2 * V2New（），* V2Duplicate（）;
+extern Point2 * V2MulPointByProjMatrix（）;
+extern Matrix3 * V2MatMul（），* TransposeMatrix3（）;
+
+extern double V3SquaredLength（），V3Length（）;
+extern double V3Dot（），V3DistanceBetween2Points（）;
+extern Vector3 * V3Normalize（），* V3Scale（），* V3Add（），* V3Sub（）;
+extern Vector3 * V3Lerp（），* V3Combine（），* V3Mul（），* V3Cross（）;
+extern Vector3 * V3New（），* V3Duplicate（）;
+extern Point3 * V3MulPointByMatrix（），* V3MulPointByProjMatrix（）;
+extern Point3 * V3MulPointByMatrix4（），* V3MulVectorByMatrix4（）;
+extern Matrix4 * V3MatMul（）;
+
+extern double RegulaFalsi（），NewtonRaphson（），findroot（）;
+
+Vector3 * V3Negate（Vector3 * v）;
+
+＃萬一

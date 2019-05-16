@@ -1,0 +1,207 @@
+<html>
+<head>
+<title>hw4</title>
+<style>
+    body { margin: 0; }
+	canvas { width: 100%; height: 100% }
+</style>
+</head>
+<body> 
+	<h1 style="text-align:center">Homework 4</h1>
+	<hr>
+	<div id="container" style="float:left; margin:3px; width:30vw; height:30vw">
+	</div>
+	Radius<input type=range min=2.5 max=7.5 step=0.5 id='Radius'>
+	<br><br><br>
+	Sound<input type="checkbox" id="Sound" value="Sound"> 
+	<br><br><br><br><br>
+	<div id=note></div>
+	<br><br><br><br><br>
+	<button id="toggle" style="width:6%">Start/Pause</button>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script>
+	$('#toggle').click(function () {
+	  start = !start;
+	  if (start) { 
+		$('#toggle').text ('Pause')
+	  } 
+      else {
+	    $('#toggle').text ('Start')
+      }
+	});	
+	
+	$('#Sound').click(function () {
+		so = !so;
+	});
+	
+	$('#Radius').change ( function() {
+	  radius = $(this).val();
+	  ra = true;
+	})
+	
+	var rMaxX, rMaxY, rMinX, rMinY, cX, cY, Rad2;
+	var ra = false;
+	var change = false;
+	var so = false;
+	var start = true;
+	var mouse = new THREE.Vector2();
+	var camera, scene, renderer,circle,radius=5,r=5,rectangle;
+	var pos, vel;
+	var pickables = [];
+	var sound;
+	var raycaster;
+	init();
+	animate();
+
+	function init() {
+		document.getElementById("note").innerHTML = document.getElementsByName("Sound");
+	  var ww = $("#container").innerWidth();
+	  var hh = $("#container").innerHeight();
+	  renderer = new THREE.WebGLRenderer();
+	  renderer.setSize(ww, hh);
+	  renderer.setClearColor(0xF3F3F3);
+	  $("#container").append(renderer.domElement);
+	  
+	  ////////////////////////////////////////////////
+
+	  scene = new THREE.Scene();
+	  camera = new THREE.OrthographicCamera (-50,50,50,-50,1, 1000);// 正交相机
+	  camera.position.z = 500;
+      ////////////////////////////////////////////////
+	  circle = new THREE.Mesh (new THREE.CircleGeometry (radius,20), new THREE.MeshBasicMaterial({color: 0xff9900}));
+	  scene.add (circle);
+	  
+	  rectangle = new THREE.Mesh (new THREE.BoxGeometry (20, 5, 0), new THREE.MeshBasicMaterial({color: 0x666666}));
+	  scene.add(rectangle);
+	  /////////////////////////////////////////////////
+	  sound = new Audio("sounds/punch1.mp3");
+	  
+	  let geometry = new THREE.Geometry();
+	  geometry.vertices.push(
+		new THREE.Vector3(-40, -40, 0),
+		new THREE.Vector3(40, -40, 0),
+		new THREE.Vector3(40, 40, 0),
+		new THREE.Vector3(-40, 40, 0),
+		new THREE.Vector3(-40, -40, 0));
+	  //////////////////////////////////
+	  let border = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: 0x0000ff}));
+	  scene.add(border);
+	  ////////////////////////////////
+	  plane = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshBasicMaterial({ color: 0xF3F3F3, transparent: true, opacity: 0, visible:true}));
+	  scene.add(plane);
+	  pickables = [plane];
+	  ////////////////////////////////
+	  pos = new THREE.Vector3();
+	  vel = new THREE.Vector3(5,4,0);
+	  window.addEventListener('resize', onWindowResize, false);
+	  raycaster = new THREE.Raycaster();
+	  window.addEventListener('mousedown', onDocumentMouseDown, false);
+	}	
+	
+	function onDocumentMouseDown(event) {
+	  var viewportPos =$('#container').get(0).getBoundingClientRect(); 
+		mouse.x = ((event.clientX - viewportPos.left) / $('#container').innerWidth()) * 2 - 1;
+	  mouse.y = -((event.clientY - viewportPos.top) / $('#container').innerHeight()) * 2 + 1;
+		raycaster.setFromCamera(mouse, camera);
+	  var intersects = raycaster.intersectObjects (pickables);
+	  if (intersects.length > 0) {
+		rectangle.position.copy(intersects[0].point);
+	  }
+	}
+	
+	function onWindowResize() {
+	  var ww = $("#container").innerWidth();
+	  var hh = $("#container").innerHeight();
+
+	  camera.aspect = ww / hh;
+	  camera.updateProjectionMatrix();
+	  renderer.setSize(ww, hh);
+	}
+
+	function animate() {
+	  rMaxX = rectangle.position.x + 10;
+	  rMaxY = rectangle.position.y + 2.5;
+	  rMinX = rectangle.position.x - 10;
+	  rMinY = rectangle.position.y - 2.5;
+	  cX = circle.position.x;
+	  cY = circle.position.y;
+	  Rad2 = radius * radius;
+	  dt = start ? 0.5 : 0;
+	  
+	  pos.add (vel.clone().multiplyScalar(dt));
+	  
+	  if (Math.abs(pos.x) > 40-radius || Math.abs(pos.y) > 40-radius) {
+		if(so === true)	{
+		  sound.play();
+		}
+	    if (Math.abs(pos.x) > 40-radius){
+		  vel.x *= -1; 
+		}
+		if (Math.abs(pos.y) > 40-radius){
+		  vel.y *= -1;
+		}
+        change = true;		
+	  }
+	  else{
+	    change = false;
+	  }
+	  /*if (Math.abs(pos.y) > 40-radius) {
+		if(so === true)	{
+		  sound.play();
+		}
+		vel.y *= -1; 
+        change = true;		
+	  }
+	  else{
+	    change = false;
+	  }*/
+	  
+	  
+	  if(ra === true){
+		ra = false;
+		scene.remove(circle);
+		circle = new THREE.Mesh (new THREE.CircleGeometry (radius,20), new THREE.MeshBasicMaterial({color: 0xff9900}));
+		scene.add(circle);
+	  }
+	  if(change === true){
+		scene.remove(circle);
+		circle = new THREE.Mesh (new THREE.CircleGeometry (radius,20), new THREE.MeshBasicMaterial({color: 0xff0000}));
+		document.getElementById("note").innerHTML = "collision!";
+		scene.add(circle);
+	  }
+	  else{
+		scene.remove(circle);
+		circle = new THREE.Mesh (new THREE.CircleGeometry (radius,20), new THREE.MeshBasicMaterial({color: 0xff9900}));
+		document.getElementById("note").innerHTML = "no collision";
+		scene.add(circle);
+	  }
+	  circle.position.copy (pos);	  
+	  requestAnimationFrame(animate);
+	  $.ajaxSetup({async:false});
+	  $.get( "http://127.0.0.1:1337/api?cX="+ cX + "&cY="+ cY + "&r=" + radius + "&minX=" + rMinX + "&minY=" + rMinY + "&maxX=" + rMaxX + "&maxY=" + rMaxY, function(data) {
+		if(data && data.output){
+			var coords = data.output.split (" ");
+			console.log(coords[0]);
+			if(coords[0]==="1"){
+				change = true;
+			}
+			else{
+				change = false;
+			}
+			disc.position.set (10*coords[0], 10*coords[1], 0.0);
+			console.log (theta + ": " + coords[0] + ", " + coords[1]);
+		}
+	  });		
+	  render();
+	}
+
+	function render() {
+		renderer.render(scene, camera);
+	}
+
+</script>
+</body>
+
+</html>
+
