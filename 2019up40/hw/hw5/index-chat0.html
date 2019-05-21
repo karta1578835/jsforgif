@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+  <head>
+    <title>hw5</title>
+    <center><font size="4"><h1 id='title'>GGG</h1></font></center>
+	<hr>
+	<style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      #messages { margin-bottom: 40px }
+      #status-box {
+        text-align: right;
+        font-size: .6em;
+      }
+	
+	</style>
+  </head>
+  <body>
+    <div id="status-box">Server: <span id="status">-</span> / <span id="online">0</span> online.</div>
+	<ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" placeholder="說點什麼？"/><button>Send</button>
+    </form>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script>
+	//il 字條的背景
+	//form send那條
+	//Helvetica, Arial; 字體
+	/////////////////////////////////////////////////////人數
+	  document.addEventListener("DOMContentLoaded", () => {
+        var socket = io();//??????????
+        var status = document.getElementById("status");
+        var online = document.getElementById("online");
+ 
+        socket.on("connect", function () {//var socket = io()抓取他的值
+            status.innerText = "Connected.";
+        });
+ 
+        socket.on("disconnect", function () {
+            status.innerText = "Disconnected.";
+        });
+ 
+        socket.on("online", function (amount) {
+            online.innerText = amount;
+        });
+      });
+	////////////////////////////////////////////////////////
+	  $(function () {
+		//////////
+		var socket = io();
+		let myname = document.location.search.match(/\?name=(.+)/)[1];
+		//console.log("name = "+ myname);
+		$('#title').text ('Hi, '+ myname) ;
+		/////////////
+		var socket = io.connect ('http://localhost');
+                    // or, io(); // no url is specified 
+                    // default to the host serving this page
+        $('form').submit(function(){
+		  socket.emit('chat message', $('#m').val(), myname);
+          $('#m').val('');
+          return false;
+        });
+        socket.on('chat message', function(msg, name){
+		  myname = document.location.search.match(/\?name=(.+)/)[1];//不這樣讀不到?
+		  $('#messages').append($('<li>').text(myname + ": " + msg));
+          window.scrollTo(0, document.body.scrollHeight);
+        //scrollHeight 沒使用滾輪顯示所有內容最小高度值
+		});
+      });
+    </script>
+  </body>
+</html>
